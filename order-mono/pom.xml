@@ -129,8 +129,6 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-
-
 		<!--工程依赖jar -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
