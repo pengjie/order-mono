@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.huinong.payment.idcenter.SerialGenFactory;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenFactory;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.CmbPayShopEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectEventEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectStateEnum;

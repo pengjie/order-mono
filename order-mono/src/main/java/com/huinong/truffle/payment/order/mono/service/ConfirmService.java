@@ -13,12 +13,12 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.huinong.payment.idcenter.SerialGenFactory;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenFactory;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.CmbPayShopEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectEventEnum;
@@ -37,7 +37,6 @@ import com.huinong.truffle.payment.order.mono.entity.HnpDetailEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
 import com.huinong.truffle.payment.order.mono.util.MathUtils;
-import com.huinong.truffle.payment.order.mono.util.RespResultParser;
 
 /**
  * 确认收货-结算订单

@@ -137,10 +137,15 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.huinong.payment</groupId>
-			<artifactId>payment-idcenter</artifactId>
-			<version>0.0.1</version>
+			<groupId>org.lable.oss.uniqueid</groupId>
+			<artifactId>uniqueid-core</artifactId>
+			<version>1.13</version>
 		</dependency>
+		<dependency>
+			<groupId>org.lable.oss.uniqueid</groupId>
+			<artifactId>uniqueid-zookeeper</artifactId>
+			<version>1.13</version>
+		</dependency>	
 	</dependencies>
 	<build>
 		<plugins>
@@ -151,10 +156,4 @@
 		</plugins>
 		<finalName>payment-order-mono</finalName>
 	</build>
-	<!-- <build> <finalName>payment-order-server</finalName> <plugins> <plugin> 
-		<groupId>org.apache.maven.plugins</groupId> <artifactId>maven-compiler-plugin</artifactId> 
-		<configuration> <source>1.7</source> <target>1.7</target> </configuration> 
-		</plugin> </plugins> <resources> <resource> <directory>${project.basedir}/src/main/resources</directory> 
-		<filtering>true</filtering> </resource> </resources> </build> -->
-
 </project>

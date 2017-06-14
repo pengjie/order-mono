@@ -32,6 +32,13 @@ public class OrderAppConf implements Serializable {
     @Value("${handcharge.quickpay}")
     private String quickfee ;
     
+    //zk 
+    @Value("${zk.zkQuorurm}")
+    private String zkQuorurm ;
+    
+    @Value("${zk.serialGenZnode}")
+    private String serialGenZnode ;
+    
 
     public String getBankCardFee() {
         return bankCardFee;
@@ -65,10 +72,27 @@ public class OrderAppConf implements Serializable {
         this.quickfee = quickfee;
     }
 
+	public String getZkQuorurm() {
+		return zkQuorurm;
+	}
+
+	public void setZkQuorurm(String zkQuorurm) {
+		this.zkQuorurm = zkQuorurm;
+	}
+
+	public String getSerialGenZnode() {
+		return serialGenZnode;
+	}
+
+	public void setSerialGenZnode(String serialGenZnode) {
+		this.serialGenZnode = serialGenZnode;
+	}
+
 	@Override
 	public String toString() {
 		return "OrderAppConf [bankCardFee=" + bankCardFee + ", wxfee=" + wxfee
-				+ ", alifee=" + alifee + ", quickfee=" + quickfee + "]";
+				+ ", alifee=" + alifee + ", quickfee=" + quickfee
+				+ ", zkQuorurm=" + zkQuorurm + ", serialGenZnode="
+				+ serialGenZnode + "]";
 	}
-
 }

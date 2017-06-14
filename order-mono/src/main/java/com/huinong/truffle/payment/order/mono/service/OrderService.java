@@ -15,12 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.huinong.payment.idcenter.SerialGenFactory;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenFactory;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
@@ -34,7 +33,6 @@ import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
 import com.huinong.truffle.payment.order.mono.entity.HnpDetailEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.util.CopyBeanUtil;
-import com.huinong.truffle.payment.order.mono.util.RespResultParser;
 
 @Service("orderService")
 public class OrderService {

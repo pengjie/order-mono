@@ -3,10 +3,10 @@ server:
   port: 16112
 spring:
   application:
-    name: payment-order-mono
+    name: order-mono
   cloud:
     config:
-      name: payment-order #定位Git中的资源
+      name: order-mono #定位Git中的资源
       profile: ${config.profile:dev} #默认指定pro结尾的文件如: message-center-pro.yml
       label: master #对应git分支
       discovery:
