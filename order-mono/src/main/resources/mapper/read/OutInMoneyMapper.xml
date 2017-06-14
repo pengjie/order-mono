@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO">
+	<resultMap id="BaseResultMap" type="com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity">
+		<result column="main_order_no" property="mainOrderNo" jdbcType="VARCHAR" />
+		<result column="order_no" property="orderNo" jdbcType="VARCHAR"/>
+		<result column="order_serial_number" property="orderSerialNumber" jdbcType="VARCHAR"/>
+		<result column="amount" property="amount" jdbcType="DECIMAL"/>
+		<result column="fee" property="fee" jdbcType="DECIMAL"/>
+		<result column="fee_rule" property="feeRule" jdbcType="VARCHAR"/>
+		<result column="trans_amt" property="transAmt" jdbcType="DECIMAL"/>
+		<result column="receive_userid" property="receiveUserid" jdbcType="BIGINT"/>
+		<result column="receive_user_type" property="receiveUserType" jdbcType="VARCHAR"/>
+		<result column="accno" property="accno" jdbcType="VARCHAR"/>
+		<result column="account_name" property="accountName" jdbcType="VARCHAR"/>
+		<result column="receive_bank_addr" property="receiveBankAddr" jdbcType="VARCHAR"/>
+		<result column="receive_bank_name" property="receiveBankName" jdbcType="VARCHAR"/>
+		<result column="serial_number" property="serialNumber" jdbcType="VARCHAR"/>
+		<result column="pay_channel" property="payChannel" jdbcType="VARCHAR"/>
+		<result column="pay_time" property="payTime" jdbcType="TIMESTAMP"/>
+		<result column="direct_status" property="directStatus" jdbcType="VARCHAR"/>
+		<result column="bank_flg" property="bankFlg" jdbcType="VARCHAR"/>
+		<result column="type" property="type" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 查询付款列表 -->
+	<resultMap id="ResultMap" type="com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity" extends="BaseResultMap" >
+		<result column="orderId" property="orderId" jdbcType="BIGINT"/>
+	</resultMap>
+	
+
+	<!-- <parameterMap id=DetailDTO type="com.huinong.truffle.payment.order.mono.entity.HnpDetailDTO"/> -->
+	
+	<!-- 单表查询列 -->
+	<sql id="Base_Column_List">
+		main_order_no,order_no,order_serial_number,amount,fee,fee_rule,
+		trans_amt,receive_userid,receive_user_type,accno,account_name,
+		receive_bank_addr,receive_bank_name,serial_number,pay_channel,
+		pay_time,direct_status,bank_flg,type
+	</sql>
+	
+	
+	<!-- 根据订单流水号查询结算订单信息 -->
+	<select id="getByOrderSerialNumber" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from hnp_out_money
+		WHERE order_serial_number = #{orderSerialNumber,jdbcType=VARCHAR} AND receive_user_type = #{userType,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据结算流水号查询结算订单信息 -->
+	<select id="getBySerialNumber" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from hnp_out_money
+		WHERE serial_number = #{serialNumber,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 查询结算订单列表 -->
+	<select id="listOutInMoney" resultMap="ResultMap" >
+		SELECT  
+            m.main_order_no AS mainOrderNo,m.order_no AS orderNo,
+            m.order_serial_number AS orderSerialNumber,m.amount,
+            m.fee,m.fee_rule AS feeRule,m.trans_amt AS transAmt,
+            m.receive_userid AS receiveUserid,m.receive_user_type AS receiveUserType,
+            m.accno,m.account_name AS accountName,m.receive_bank_addr AS receiveBankAddr,
+            m.receive_bank_name AS receiveBankName,m.serial_number AS serialNumber,
+            m.pay_channel AS payChannel,m.pay_time AS payTime,m.direct_status AS directStatus,
+            m.bank_flg AS bankFlg,m.type,o.id AS orderId
+        FROM hnp_out_money m LEFT JOIN  hnp_order o on m.order_serial_number = o.serial_number
+        WHERE 1=1 
+        <if test="query != null">
+        	<if test="query.directStatus !=null">
+        		AND m.direct_status=#{query.directStatus,jdbcType=VARCHAR} 
+        	</if>
+        	<if test="query.serialNumber !=null">
+        	 	AND m.serial_number=#{query.serialNumber,jdbcType=VARCHAR}
+        	</if>
+        	<if test="query.payTime !=null">
+        	 	AND m.pay_time=#{query.payTime,jdbcType=TIMESTAMP}
+        	</if>        	
+        </if>
+	</select>
+	
+	<!-- 统计发生额 -->
+	<select id="calcOccurByMainOrderNo" resultMap="java.lang.Double" parameterType="java.lang.String">
+		SELECT IFNULL(SUM(IFNULL(trans_amt,0)),0) FROM hnp_out_money
+		WHERE main_order_no = #{mainOrderNo,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

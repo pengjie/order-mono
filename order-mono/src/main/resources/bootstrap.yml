@@ -1,0 +1,27 @@
+#配置中心的地址一定要放在bootstrap.yml|properties中,指定git读取配置中心文件
+server:
+  port: 16112
+spring:
+  application:
+    name: payment-order-mono
+  cloud:
+    config:
+      name: payment-order #定位Git中的资源
+      profile: ${config.profile:dev} #默认指定pro结尾的文件如: message-center-pro.yml
+      label: master #对应git分支
+      discovery:
+        enabled: true #开启通过服务来访问Config Server的功能
+        service-id: api-config #指定Config Server注册的服务名
+        
+  profiles:
+    active: dev
+     
+eureka:
+  instance:
+    prefer-ip-address: true
+    lease-expiration-duration-in-seconds: 30 
+    lease-renewal-interval-in-seconds: 10
+  
+  client:
+    serviceUrl:
+      defaultZone: http://10.10.11.172:1111/eureka/

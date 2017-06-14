@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huinong.truffle.payment.order.mono.dao.write.MainOrderWriteDAO">
+	
+	<!-- 新增主订单信息 -->
+	<insert id="addMainOrder" useGeneratedKeys="true" keyProperty="id" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity">
+		insert into hnp_main_order(main_order_no,source_sys,total_amt,out_uid,hnchannel,order_state,create_time,modify_time)
+		values(
+			 #{mainOrderNo,jdbcType=VARCHAR},#{req_from,jdbcType=VARCHAR},#{totalAmount,jdbcType=DECIMAL},
+			 #{appPayerId,jdbcType=BIGINT},#{hnchannel,jdbcType=VARCHAR},#{orderStatus,jdbcType=TINYINT},
+			 now(),now()
+		)
+	</insert>
+	
+	<!-- 更新主订单信息 -->
+	<update id="update" >
+		update hnp_main_order set modify_time = now(),order_status = #{orderStatus,jdbcType=VARCHAR} 
+		where main_order_no = #{mainOrderNo,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除订单 -->
+	<delete id = "delMainOrder">
+		delete from hnp_main_order where id = #{id,jdbcType=BIGINT}
+	</delete> 
+
+</mapper>
