@@ -21,13 +21,12 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectStat
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
-import com.huinong.truffle.payment.order.mono.dao.write.OrderItemWriteDAO;
+import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
 import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
-import com.huinong.truffle.payment.order.mono.entity.HnpDetailEntity;
+import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
 import com.huinong.truffle.payment.order.mono.util.CopyBeanUtil;
-import com.huinong.truffle.payment.order.mono.util.ParamHandler;
 
 /**
  * 订单结算
@@ -48,7 +47,7 @@ public class SetlService {
 	private OutInMoneyWriteDAO outInMoneyWriteDAO ;
 	
 	@Autowired
-	private OrderItemWriteDAO orderItemWriteDAO ;
+	private OrderWriteDAO orderWriteDAO ;
 
 
 	public BaseResult<List<OutInMoney>> listProcess() throws Exception {
@@ -119,23 +118,22 @@ public class SetlService {
 		}
 		
 		// 更新单笔订单状态
-		HnpDetailEntity entity = new HnpDetailEntity() ;
-		entity.setId(orderId);
-		entity.setOrderId(orderId);
-		entity.setFinishedTimestamp(new Date());
+		HnpOrderEntity record = new HnpOrderEntity();
+		record.setId(orderId);
+		record.setFinishedTimestamp(new Date());
 		if (state.equals(DirectStateEnum.PROCESSING.val)) {
 			// 处理中
-			entity.setPayState(String.valueOf(OrderStateEnum.ORDER_6.val));
+			record.setPayState(String.valueOf(OrderStateEnum.ORDER_6.val));
 		} else {
 			if (type.equals(DirectEventEnum.DIRECT_PAY.val)) {
 				// 确认收货-付款
-				entity.setPayState(String.valueOf(OrderStateEnum.ORDER_3.val));
+				record.setPayState(String.valueOf(OrderStateEnum.ORDER_3.val));
 			} else {
 				// 确认退货-退款
-				entity.setPayState(String.valueOf(OrderStateEnum.ORDER_4.val));
+				record.setPayState(String.valueOf(OrderStateEnum.ORDER_4.val));
 			}
 		}
-		int m = orderItemWriteDAO.updateOrderStatus(entity);
+		int m = orderWriteDAO.updateByPrimaryKeySelective(record);
 		if(m <=0){
 			logger.info("更新付款明细订单状态失败");
 			return BaseResult.fail(OrderResultCode.DB_0018);

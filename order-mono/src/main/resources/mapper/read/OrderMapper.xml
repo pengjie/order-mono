@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huinong.truffle.payment.order.mono.dao.read.OrderReadDAO" >
+  <resultMap id="BaseResultMap" type="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_id" property="orderId" jdbcType="VARCHAR" />
+    <result column="app_id" property="appId" jdbcType="TINYINT" />
+    <result column="order_from_system" property="orderFromSystem" jdbcType="VARCHAR" />
+    <result column="order_summary" property="orderSummary" jdbcType="VARCHAR" />
+    <result column="out_uid" property="outUid" jdbcType="BIGINT" />
+    <result column="in_uid" property="inUid" jdbcType="BIGINT" />
+    <result column="amt" property="amt" jdbcType="DECIMAL" />
+    <result column="need_pay" property="needPay" jdbcType="DECIMAL" />
+    <result column="sys_off_amt" property="sysOffAmt" jdbcType="DECIMAL" />
+    <result column="pay_off_amt" property="payOffAmt" jdbcType="DECIMAL" />
+    <result column="order_timestamp" property="orderTimestamp" jdbcType="TIMESTAMP" />
+    <result column="pay_state" property="payState" jdbcType="CHAR" />
+    <result column="deleted" property="deleted" jdbcType="TINYINT" />
+    <result column="hash" property="hash" jdbcType="VARCHAR" />
+    <result column="refund_state" property="refundState" jdbcType="CHAR" />
+    <result column="payed_timestamp" property="payedTimestamp" jdbcType="TIMESTAMP" />
+    <result column="finished_timestamp" property="finishedTimestamp" jdbcType="TIMESTAMP" />
+    <result column="closed_timestamp" property="closedTimestamp" jdbcType="TIMESTAMP" />
+    <result column="refund_timestamp" property="refundTimestamp" jdbcType="TIMESTAMP" />
+    <result column="group_order_no" property="groupOrderNo" jdbcType="VARCHAR" />
+    <result column="merchant_off_amt" property="merchantOffAmt" jdbcType="DECIMAL" />
+    <result column="shop_name" property="shopName" jdbcType="VARCHAR" />
+    <result column="in_uname" property="inUname" jdbcType="VARCHAR" />
+    <result column="serial_number" property="serialNumber" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, order_id, app_id, order_from_system, order_summary, out_uid, in_uid, amt, need_pay, 
+    sys_off_amt, pay_off_amt, order_timestamp, pay_state, deleted, hash, refund_state, 
+    payed_timestamp, finished_timestamp, closed_timestamp, refund_timestamp, group_order_no, 
+    merchant_off_amt, shop_name, in_uname, serial_number
+  </sql>
+  
+  <!-- 根据主键ID查询子订单信息 -->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from hnp_order
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <!-- 根据子流水号查询子订单信息 -->
+  <select id="selectBySerialNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from hnp_order
+    where serial_number = #{serialNumber ,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据子订单号查询子订单信息 -->
+  <select id="selectByOrderNo" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from hnp_order
+    where order_id = #{orderNo,jdbcType=VARCHAR}
+  </select>  
+  
+  <!-- 根据主订单号查询子订单列表 -->
+  <select id="listByMainOrderNo" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from hnp_order
+    where group_order_no = #{mainOrderNo,jdbcType=VARCHAR}
+  </select>   
+  
+</mapper>

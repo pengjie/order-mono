@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.huinong.truffle.payment.order.mono.dao.read.MainOrderReadDAO">
-	<resultMap id="BaseResultMap" type="HnpOrderEntity">
-		<result column="id" property="id" jdbcType="BIGINT"/>
-		<result column="main_order_no" property="mainOrderNo" jdbcType="VARCHAR"/>
-		<result column="source_sys" property="req_from" jdbcType="VARCHAR"/>
-		<result column="total_amt" property="totalAmount" jdbcType="DECIMAL"/>
-		<result column="out_uid" property="appPayerId" jdbcType="BIGINT"/>
-		<result column="hnchannel" property="hnchannel" jdbcType="VARCHAR"/>
-		<result column="pay_channel" property="payChannel" jdbcType="VARCHAR"/>
-		<result column="order_state" property="orderStatus" jdbcType="TINYINT"/>
+	<resultMap id="BaseResultMap" type="com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity">
+	    <id column="id" property="id" jdbcType="BIGINT" />
+	    <result column="main_order_no" property="mainOrderNo" jdbcType="VARCHAR" />
+	    <result column="source_sys" property="sourceSys" jdbcType="VARCHAR" />
+	    <result column="total_amt" property="totalAmt" jdbcType="DECIMAL" />
+	    <result column="out_uid" property="outUid" jdbcType="BIGINT" />
+	    <result column="hnchannel" property="hnchannel" jdbcType="VARCHAR" />
+	    <result column="order_state" property="orderState" jdbcType="TINYINT" />
+	    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
 	</resultMap>
 
 	<!-- <parameterMap id="Person" type="com.huinong.gateway.access.entity.Person"/> -->
 
 	<sql id="Base_Column_List">
-		id, main_order_no, source_sys, total_amt,out_uid,hnchannel,pay_channel,order_state
+	    id, main_order_no, source_sys, total_amt, out_uid, hnchannel, order_state, create_time, 
+	    modify_time
 	</sql>
 
 	<!-- 根据主订单号查询订单信息 -->
-	<select id="getDTOByUniqueValue" resultMap="BaseResultMap" parameterType="java.lang.String">
+	<select id="selectByMainOrderNo" resultMap="BaseResultMap" parameterType="java.lang.String">
 		select
 		<include refid="Base_Column_List" />
 		from hnp_main_order 
-		where main_order_no = #{uniqueValue,jdbcType=VARCHAR}
+		where main_order_no = #{mainOrderNo,jdbcType=VARCHAR}
 	</select>
 
 </mapper>

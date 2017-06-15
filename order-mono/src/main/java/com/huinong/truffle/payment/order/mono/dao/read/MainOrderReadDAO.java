@@ -1,8 +1,9 @@
 package com.huinong.truffle.payment.order.mono.dao.read;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
+import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 
 /**
  * @author peng
@@ -17,7 +18,15 @@ public interface MainOrderReadDAO {
 	 * @param uniqueValue
 	 * @return
 	 * @throws Exception
-	 */
 	public HnpOrderEntity getDTOByUniqueValue(Object uniqueValue) throws Exception;
+	*/
+	
+	/**
+	 * 按主订单号查询订单信息
+	 * @param mainOrderNo
+	 * @return
+	 */
+	public HnpMainOrderEntity selectByMainOrderNo(@Param("mainOrderNo") String mainOrderNo) ;
+	
 
 }

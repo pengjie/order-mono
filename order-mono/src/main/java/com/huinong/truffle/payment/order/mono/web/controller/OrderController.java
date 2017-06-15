@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiOperation;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.huinong.truffle.component.base.component.version.anno.ApiVersion;
 import com.huinong.truffle.component.base.constants.BaseResult;
-import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
-import com.huinong.truffle.payment.order.mono.domain.HnpDetail;
+import com.huinong.truffle.payment.order.mono.domain.HnpMainOrder;
 import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
 import com.huinong.truffle.payment.order.mono.service.OrderService;
 
@@ -44,14 +41,13 @@ public class OrderController extends BaseController{
     
     /**
      * 测试
-     */
     @RequestMapping(value = { "/test" }, method = {RequestMethod.POST, RequestMethod.GET })
     public BaseResult<String> test(HttpServletRequest request){
         logger.info("测试日志------------------");
         BaseResult<String>  resultDTO = new BaseResult<String>();
         resultDTO.setData("operater sucess");
         return resultDTO ;
-    }
+    }*/
 
     
 	/**
@@ -61,30 +57,15 @@ public class OrderController extends BaseController{
 	 */
     @ApiVersion(1)
     @ApiOperation(value="创建订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
-//	@RequestMapping(value = "/create", method = {RequestMethod.GET,RequestMethod.POST})
-//   /* @ApiImplicitParams({
-//    	@ApiImplicitParam(name = "appId", value = "平台标识", required = true, paramType="query", dataType = "Integer"),
-//    	@ApiImplicitParam(name = "req_from", value = "平台来源", required = true, paramType="query", dataType = "String"),
-//    	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String"),
-//    	@ApiImplicitParam(name = "appPayerId", value = "买家ID", required = true, paramType="query", dataType = "Long"),
-//    	@ApiImplicitParam(name = "hnchannel", value = "下单渠道", required = true, paramType="query", dataType = "String"),
-//    	@ApiImplicitParam(name = "data", value = "订单明细json", required = true, paramType="query", dataType = "String")
-//    })*/
+	@RequestMapping(value = "/create", method = {RequestMethod.POST})
     @ApiImplicitParams({
-    	@ApiImplicitParam(name = "reqDTO", value = "预支付订单对象", required = true, paramType="body", dataType = "HnpOrder")
+    	@ApiImplicitParam(name = "mainOrder", value = "预支付订单对象", required = true, paramType="body", dataType = "HnpMainOrder")
     })
-    public BaseResult<HnpOrder> create(HnpOrder reqDTO){
-	    logger.info("[订单服务][预支付]请求参数:"+gson.toJson(reqDTO));
-	    BaseResult<HnpOrder> resultDTO = new BaseResult<HnpOrder>();
-		try {
-			resultDTO = orderService.createOrder(reqDTO);
-			logger.info("[订单服务][预支付]返回参数:"+gson.toJson(resultDTO));
-			return resultDTO;
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.info("订单服务异常："+e);
-			return BaseResult.fail(ResultCode.INNER_ERROR);
-		}
+    public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
+	    logger.info("[订单服务][预支付]请求参数:"+gson.toJson(mainOrder));
+	    BaseResult<HnpMainOrder> resultDTO = orderService.createOrder(mainOrder);
+	    logger.info("[订单服务][预支付]返回参数:"+gson.toJson(resultDTO));
+	    return resultDTO;
 	}
 	
 	/**
@@ -97,19 +78,12 @@ public class OrderController extends BaseController{
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String")
     })
-    @RequestMapping(value = "/query", method= {RequestMethod.POST,RequestMethod.GET})
-	public BaseResult<HnpOrder> query(String mainOrderNo){
+    @RequestMapping(value = "/query", method= {RequestMethod.POST})
+	public BaseResult<HnpMainOrder> query(String mainOrderNo){
 	    logger.info("[订单服务][查询]请求参数:mainOrderNo="+mainOrderNo);
-	    BaseResult<HnpOrder> resultDTO = new BaseResult<HnpOrder>();
-	    try {
-	    	resultDTO = orderService.queryOrder(mainOrderNo);
-	    	logger.info("[订单服务][查询]返回参数:"+gson.toJson(resultDTO));
-	    	return resultDTO ;
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.info("[订单服务][查询]异常："+e);
-			return BaseResult.fail(ResultCode.INNER_ERROR);
-		}
+	    BaseResult<HnpMainOrder> resultDTO  = orderService.queryMainOrder(mainOrderNo);
+	    logger.info("[订单服务][查询]返回参数:"+gson.toJson(resultDTO));
+    	return resultDTO ;
 	}
 	
 	/**
@@ -123,18 +97,11 @@ public class OrderController extends BaseController{
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String")
     })
     @RequestMapping(value = "/querylist", method= RequestMethod.POST)
-    public BaseResult<List<HnpDetail>> querylist(String mainOrderNo){
+    public BaseResult<List<HnpOrder>> querylist(String mainOrderNo){
         logger.info("[订单服务][查询]请求参数:mainOrderNo="+mainOrderNo);
-        BaseResult<List<HnpDetail>> resultDTO = new BaseResult<List<HnpDetail>>();
-        try {
-        	resultDTO = orderService.queryDetail(mainOrderNo);
-        	logger.info("[订单服务][查询]返回参数:"+gson.toJson(resultDTO));
-        	return resultDTO ;
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.info("[订单服务][查询]异常："+e);
-			return BaseResult.fail(ResultCode.INNER_ERROR);
-		}
+        BaseResult<List<HnpOrder>> resultDTO = orderService.queryDetail(mainOrderNo);
+        logger.info("[订单服务][查询]返回参数:"+gson.toJson(resultDTO));
+    	return resultDTO ;
     }
     
     /**
@@ -148,39 +115,11 @@ public class OrderController extends BaseController{
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String")
     })
     @RequestMapping(value = "/finish", method= RequestMethod.POST)
-    public BaseResult<HnpOrder> finish(String mainOrderNo){
+    public BaseResult<HnpMainOrder> finish(String mainOrderNo){
         logger.info("[订单服务][完结订单]请求参数:mainOrderNo="+mainOrderNo);
-        BaseResult<HnpOrder> resultDTO = new BaseResult<HnpOrder>();
-		try {
-			Integer orderState = OrderStateEnum.ORDER_2.val ;
-			resultDTO = orderService.finishOrder(mainOrderNo,orderState);
-			logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(resultDTO));
-			return resultDTO;
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.info("订单服务异常："+e);
-			return BaseResult.fail(ResultCode.INNER_ERROR);
-		}
+        Integer orderState = OrderStateEnum.ORDER_2.val ;
+        BaseResult<HnpMainOrder> resultDTO = orderService.finishOrder(mainOrderNo,orderState);
+        logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(resultDTO));
+        return resultDTO;
     }
-    
-    
-    /**
-     * 修改订单详情
-     * @param request
-     * @return
-    @RequestMapping(value = "/updateOrderItem", method= RequestMethod.POST)
-    public String updateOrderItem(HttpServletRequest request){
-        ParamHandler paramHandler = new ParamHandler(request);
-        logger.info("[订单服务][修改订单详情]请求参数:"+gson.toJson(paramHandler.getMap()));
-        HnpDetailDTO hnpDetailDTO = gson.fromJson(paramHandler.getString("dto"), HnpDetailDTO.class);
-        BizResponse<Integer> resultDTO = new BizResponse<Integer>();
-		try {
-			resultDTO = orderService.updateOrderItem(hnpDetailDTO);
-		} catch (Exception e) {
-			e.printStackTrace();
-			resultDTO.setMessage("系统异常，请稍后再试");
-		}
-        logger.info("[订单服务][修改订单详情]返回参数:"+gson.toJson(resultDTO));
-        return gson.toJson(resultDTO);
-    }*/
 }

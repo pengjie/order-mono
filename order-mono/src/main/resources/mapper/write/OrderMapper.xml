@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO" >
+ 
+  <!-- 根据主订单号删除子订单列表 -->
+  <delete id="deleteByMainOrderNo" parameterType="java.lang.String" >
+    delete from hnp_order
+    where group_order_no = #{mainOrderNo,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 新增子订单信息 -->
+  <insert id="insert" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity" >
+    insert into hnp_order (order_id, app_id, 
+      order_from_system, order_summary, out_uid, 
+      in_uid, amt, need_pay, 
+      sys_off_amt, pay_off_amt, order_timestamp, 
+      pay_state, deleted, hash, refund_state, 
+      payed_timestamp, finished_timestamp, 
+      closed_timestamp, refund_timestamp, group_order_no, 
+      merchant_off_amt, shop_name, in_uname, 
+      serial_number)
+    values (#{orderId,jdbcType=VARCHAR}, #{appId,jdbcType=INTEGER}, 
+      #{orderFromSystem,jdbcType=VARCHAR}, #{orderSummary,jdbcType=VARCHAR}, #{outUid,jdbcType=BIGINT}, 
+      #{inUid,jdbcType=BIGINT}, #{amt,jdbcType=DECIMAL}, #{needPay,jdbcType=DECIMAL}, 
+      #{sysOffAmt,jdbcType=DECIMAL}, #{payOffAmt,jdbcType=DECIMAL}, #{orderTimestamp,jdbcType=TIMESTAMP}, 
+      #{payState,jdbcType=CHAR}, #{deleted,jdbcType=BIT}, #{hash,jdbcType=VARCHAR}, #{refundState,jdbcType=CHAR}, 
+      #{payedTimestamp,jdbcType=TIMESTAMP}, #{finishedTimestamp,jdbcType=TIMESTAMP}, 
+      #{closedTimestamp,jdbcType=TIMESTAMP}, #{refundTimestamp,jdbcType=TIMESTAMP}, #{groupOrderNo,jdbcType=VARCHAR}, 
+      #{merchantOffAmt,jdbcType=DECIMAL}, #{shopName,jdbcType=VARCHAR}, #{inUname,jdbcType=VARCHAR}, 
+      #{serialNumber,jdbcType=VARCHAR})
+  </insert>
+  
+  	<!-- 批量插入 -->
+	<insert id="batchInsertOrder" parameterType="java.util.List">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">  
+	        SELECT  
+	        LAST_INSERT_ID()  
+	    </selectKey> 
+	    insert into hnp_order (order_id, app_id, 
+	      order_from_system, order_summary, out_uid, 
+	      in_uid, amt, need_pay, 
+	      sys_off_amt, pay_off_amt, order_timestamp, 
+	      pay_state, deleted, hash, refund_state, 
+	      payed_timestamp, finished_timestamp, 
+	      closed_timestamp, refund_timestamp, group_order_no, 
+	      merchant_off_amt, shop_name, in_uname, 
+	      serial_number)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		 (
+			#{item.orderId,jdbcType=VARCHAR}, #{item.appId,jdbcType=INTEGER}, 
+      		#{item.orderFromSystem,jdbcType=VARCHAR}, #{item.orderSummary,jdbcType=VARCHAR}, 
+      		#{item.outUid,jdbcType=BIGINT},#{item.inUid,jdbcType=BIGINT}, 
+      		#{item.amt,jdbcType=DECIMAL}, #{item.needPay,jdbcType=DECIMAL}, 
+      		#{item.sysOffAmt,jdbcType=DECIMAL}, #{item.payOffAmt,jdbcType=DECIMAL}, 
+      		#{item.orderTimestamp,jdbcType=TIMESTAMP},#{item.payState,jdbcType=CHAR}, 
+      		#{item.deleted,jdbcType=BIT}, #{item.hash,jdbcType=VARCHAR}, 
+      		#{item.refundState,jdbcType=CHAR}, #{item.payedTimestamp,jdbcType=TIMESTAMP}, 
+      		#{item.finishedTimestamp,jdbcType=TIMESTAMP},#{item.closedTimestamp,jdbcType=TIMESTAMP}, 
+      		#{item.refundTimestamp,jdbcType=TIMESTAMP}, #{item.groupOrderNo,jdbcType=VARCHAR}, 
+      		#{item.merchantOffAmt,jdbcType=DECIMAL}, #{item.shopName,jdbcType=VARCHAR}, 
+      		#{item.inUname,jdbcType=VARCHAR}, #{item.serialNumber,jdbcType=VARCHAR}
+	     )
+	   </foreach>
+	</insert>    
+  
+  
+  <!-- 更新子订单信息 -->
+  <update id="updateByPrimaryKeySelective" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity" >
+    update hnp_order
+    <set >
+      <if test="orderId != null" >
+        order_id = #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        app_id = #{appId,jdbcType=INTEGER},
+      </if>
+      <if test="orderFromSystem != null" >
+        order_from_system = #{orderFromSystem,jdbcType=VARCHAR},
+      </if>
+      <if test="orderSummary != null" >
+        order_summary = #{orderSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="outUid != null" >
+        out_uid = #{outUid,jdbcType=BIGINT},
+      </if>
+      <if test="inUid != null" >
+        in_uid = #{inUid,jdbcType=BIGINT},
+      </if>
+      <if test="amt != null" >
+        amt = #{amt,jdbcType=DECIMAL},
+      </if>
+      <if test="needPay != null" >
+        need_pay = #{needPay,jdbcType=DECIMAL},
+      </if>
+      <if test="sysOffAmt != null" >
+        sys_off_amt = #{sysOffAmt,jdbcType=DECIMAL},
+      </if>
+      <if test="payOffAmt != null" >
+        pay_off_amt = #{payOffAmt,jdbcType=DECIMAL},
+      </if>
+      <if test="orderTimestamp != null" >
+        order_timestamp = #{orderTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payState != null" >
+        pay_state = #{payState,jdbcType=CHAR},
+      </if>
+      <if test="deleted != null" >
+        deleted = #{deleted,jdbcType=BIT},
+      </if>
+      <if test="hash != null" >
+        hash = #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="refundState != null" >
+        refund_state = #{refundState,jdbcType=CHAR},
+      </if>
+      <if test="payedTimestamp != null" >
+        payed_timestamp = #{payedTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="finishedTimestamp != null" >
+        finished_timestamp = #{finishedTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="closedTimestamp != null" >
+        closed_timestamp = #{closedTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="refundTimestamp != null" >
+        refund_timestamp = #{refundTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="groupOrderNo != null" >
+        group_order_no = #{groupOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="merchantOffAmt != null" >
+        merchant_off_amt = #{merchantOffAmt,jdbcType=DECIMAL},
+      </if>
+      <if test="shopName != null" >
+        shop_name = #{shopName,jdbcType=VARCHAR},
+      </if>
+      <if test="inUname != null" >
+        in_uname = #{inUname,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNumber != null" >
+        serial_number = #{serialNumber,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <!-- 更新子订单信息 -->
+  <update id="updateByMainOrderNoSelective" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity" >
+    update hnp_order
+    <set >
+      <if test="orderId != null" >
+        order_id = #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        app_id = #{appId,jdbcType=INTEGER},
+      </if>
+      <if test="orderFromSystem != null" >
+        order_from_system = #{orderFromSystem,jdbcType=VARCHAR},
+      </if>
+      <if test="orderSummary != null" >
+        order_summary = #{orderSummary,jdbcType=VARCHAR},
+      </if>
+      <if test="outUid != null" >
+        out_uid = #{outUid,jdbcType=BIGINT},
+      </if>
+      <if test="inUid != null" >
+        in_uid = #{inUid,jdbcType=BIGINT},
+      </if>
+      <if test="amt != null" >
+        amt = #{amt,jdbcType=DECIMAL},
+      </if>
+      <if test="needPay != null" >
+        need_pay = #{needPay,jdbcType=DECIMAL},
+      </if>
+      <if test="sysOffAmt != null" >
+        sys_off_amt = #{sysOffAmt,jdbcType=DECIMAL},
+      </if>
+      <if test="payOffAmt != null" >
+        pay_off_amt = #{payOffAmt,jdbcType=DECIMAL},
+      </if>
+      <if test="orderTimestamp != null" >
+        order_timestamp = #{orderTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payState != null" >
+        pay_state = #{payState,jdbcType=CHAR},
+      </if>
+      <if test="deleted != null" >
+        deleted = #{deleted,jdbcType=BIT},
+      </if>
+      <if test="hash != null" >
+        hash = #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="refundState != null" >
+        refund_state = #{refundState,jdbcType=CHAR},
+      </if>
+      <if test="payedTimestamp != null" >
+        payed_timestamp = #{payedTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="finishedTimestamp != null" >
+        finished_timestamp = #{finishedTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="closedTimestamp != null" >
+        closed_timestamp = #{closedTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="refundTimestamp != null" >
+        refund_timestamp = #{refundTimestamp,jdbcType=TIMESTAMP},
+      </if>
+      <if test="groupOrderNo != null" >
+        group_order_no = #{groupOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="merchantOffAmt != null" >
+        merchant_off_amt = #{merchantOffAmt,jdbcType=DECIMAL},
+      </if>
+      <if test="shopName != null" >
+        shop_name = #{shopName,jdbcType=VARCHAR},
+      </if>
+      <if test="inUname != null" >
+        in_uname = #{inUname,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNumber != null" >
+        serial_number = #{serialNumber,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where group_order_no = #{groupOrderNo,jdbcType=VARCHAR},
+  </update>
+  
+ 
+</mapper>

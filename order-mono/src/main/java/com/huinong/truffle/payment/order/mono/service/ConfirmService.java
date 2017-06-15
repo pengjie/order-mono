@@ -26,14 +26,14 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectStat
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.PayChannelEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.MainOrderReadDAO;
-import com.huinong.truffle.payment.order.mono.dao.read.OrderItemReadDAO;
+import com.huinong.truffle.payment.order.mono.dao.read.OrderReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.MainOrderWriteDAO;
-import com.huinong.truffle.payment.order.mono.dao.write.OrderItemWriteDAO;
+import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
 import com.huinong.truffle.payment.order.mono.domain.DirectCash;
 import com.huinong.truffle.payment.order.mono.domain.HnpSetlDetail;
-import com.huinong.truffle.payment.order.mono.entity.HnpDetailEntity;
+import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
 import com.huinong.truffle.payment.order.mono.util.MathUtils;
@@ -49,25 +49,20 @@ public class ConfirmService {
 	public Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
 	@Autowired
-	private OrderItemReadDAO orderItemReadDAO ;
-	
-	@Autowired
-	private OrderItemWriteDAO orderItemWriteDAO ;
-	
+	private DefRedisClient defRedisClient;
 	@Autowired
 	private MainOrderReadDAO mainOrderReadDAO ;
-	
 	@Autowired
 	private MainOrderWriteDAO mainOrderWriteDAO ;
-	
 	@Autowired
 	private OutInMoneyReadDAO outInMoneyReadDAO ;
-	
 	@Autowired
 	private OutInMoneyWriteDAO outInMoneyWriteDAO ;
-
 	@Autowired
-	private DefRedisClient defRedisClient;
+	private OrderReadDAO orderReadDAO ;
+	@Autowired
+	private OrderWriteDAO orderWriteDAO ;
+
 	
 	@Autowired
 	private OrderAppConf orderAppConf;
@@ -106,31 +101,32 @@ public class ConfirmService {
 			}
 
 			// 1 校验子订单信息 （单笔订单信息）
-			HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(orderSerialNumber);
+			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(orderSerialNumber);
+			/*HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(orderSerialNumber);*/
 			// 验证提交付款的订单信息与支付订单信息是否吻合
-			if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
+			/*if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
 				logger.info("订单号:{" + detailDTO.getOrderNo()+ "}付款单信息与支付底单信息不相符,请重新审核");
 				return BaseResult.fail(OrderResultCode.DB_0008);
-			}
-			if (!detailDTO.isSettled()) {
-				logger.info("订单号:{" + detailDTO.getOrderNo() + "},流水号:{"+ detailDTO.getSerialNumber() + "} 还未到帐，请核实");
+			}*/
+			if (!orderEntity.isSettled()) {
+				logger.info("订单号:{" + orderEntity.getOrderId() + "},流水号:{"+ orderEntity.getSerialNumber() + "} 还未到帐，请核实");
 				return BaseResult.fail(OrderResultCode.DB_0009);
 			}
 			// 2校验子订单流水在付款记录表中的状态
 			OutInMoneyEntity outMoneyDTO = outInMoneyReadDAO.getByOrderSerialNumber(orderSerialNumber,CmbPayShopEnum.CMB_PAY_SHOP_SELLER.val);
 			if (null != outMoneyDTO) {
 				if (outMoneyDTO.isPayFail()) {
-					logger.info("订单号：" + detailDTO.getOrderNo() + "付款失败,msg："+ outMoneyDTO.getResMessage());
+					logger.info("订单号：" + orderEntity.getOrderId() + "付款失败,msg："+ outMoneyDTO.getResMessage());
 					return BaseResult.fail(OrderResultCode.DB_0010);
 				}
 				if (outMoneyDTO.isPaySuc()) {
-					logger.info("订单号：" + detailDTO.getOrderNo() + "付款成功,请勿重复提交");
+					logger.info("订单号：" + orderEntity.getOrderId() + "付款成功,请勿重复提交");
 					return BaseResult.fail(OrderResultCode.DB_0011);
 				}
 				if (outMoneyDTO.isPaying() || outMoneyDTO.isToPay()) {
 					// 处理中-->直接返回付款单信息，进行支付（先同步支付状态）
 					DirectCash cashDTO = new DirectCash();
-					cashDTO.setOrderId(detailDTO.getOrderId());
+					cashDTO.setOrderId(orderEntity.getId());
 					cashDTO.setAccno(outMoneyDTO.getAccno());
 					cashDTO.setAccountName(outMoneyDTO.getAccountName());
 					cashDTO.setAmt(outMoneyDTO.getAmount());
@@ -150,16 +146,17 @@ public class ConfirmService {
 
 			// 不存在付款单-->制付款单
 			String ruleConfig = getHandChargeConfig(payChannel);
-			double chargeFee = calcPayCharge(payChannel, ruleConfig,detailDTO.getAmt());
-			double receiveFee = MathUtils.minusDouble(detailDTO.getAmt(),chargeFee);
+			double chargeFee = calcPayCharge(payChannel, ruleConfig,orderEntity.getAmt().doubleValue());
+			double receiveFee = MathUtils.minusDouble(orderEntity.getAmt().doubleValue(),chargeFee);
 
 			// 计算可用余额=入金支付总额-已发生额
-			HnpOrderEntity mainOrderDTO = mainOrderReadDAO.getDTOByUniqueValue(mainOrderNo);
-			if (null == mainOrderDTO) {
+			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
+			if (null == mainOrderEntity) {
 				logger.info("[mainOrderNo:"+mainOrderNo+"],订单信息不存在");
 				return BaseResult.fail(OrderResultCode.DB_0005);
 			}
-			double lastBalance = mainOrderDTO.getTotalAmount().doubleValue();
+			
+			double lastBalance = mainOrderEntity.getTotalAmt().doubleValue();
 			double occur = outInMoneyReadDAO.calcOccurByMainOrderNo(mainOrderNo);
 			double nextBalance = lastBalance - occur;
 			// 当前付款金额必须小于或等于当前余额
@@ -199,7 +196,7 @@ public class ConfirmService {
 
 			// 组付款单-->调用付款接口
 			DirectCash cashDTO = new DirectCash();
-			cashDTO.setOrderId(detailDTO.getOrderId());
+			cashDTO.setOrderId(orderEntity.getId());
 			cashDTO.setAccno(payeeAccount);
 			cashDTO.setAccountName(payeeName);
 			cashDTO.setAmt(amt);

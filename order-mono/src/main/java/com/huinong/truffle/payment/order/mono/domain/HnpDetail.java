@@ -1,4 +1,4 @@
-package com.huinong.truffle.payment.order.mono.domain;
+/*package com.huinong.truffle.payment.order.mono.domain;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -40,16 +40,16 @@ public class HnpDetail implements Serializable{
     //订单流水号
     private String serialNumber ;
     
-    /** 订单支付时间 */
+    *//** 订单支付时间 *//*
     private Date payedTimestamp;
     
-    /** 交易完成时间 */
+    *//** 交易完成时间 *//*
     private Date finishedTimestamp;
     
-    /** 交易关闭时间 */
+    *//** 交易关闭时间 *//*
     private Date closedTimestamp;
     
-    /** 退款时间 */
+    *//** 退款时间 *//*
     private Date refundTimestamp;
     
     public String getPayeeUserName() {
@@ -188,10 +188,10 @@ public class HnpDetail implements Serializable{
 		this.serialNumber = serialNumber;
 	}
 	
-	  /**
+	  *//**
      * 获取订单是否已结算(待买家确认)
      * @return
-     */
+     *//*
     public boolean isSettled(){
         boolean isflag = false ;
         if(null != payState){
@@ -202,9 +202,9 @@ public class HnpDetail implements Serializable{
         return isflag;
     }
     
-    /**
+    *//**
      * 获取对象内容的UUID 用于前后两次交互比较
-     */
+     *//*
     public String getObjectUUID(){
         StringBuilder buffer = new StringBuilder();
         buffer.append(appId == null ? "appId":appId);
@@ -217,3 +217,4 @@ public class HnpDetail implements Serializable{
     }
 
 }
+*/

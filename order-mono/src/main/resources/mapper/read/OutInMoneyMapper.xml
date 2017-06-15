@@ -83,7 +83,7 @@
 	</select>
 	
 	<!-- 统计发生额 -->
-	<select id="calcOccurByMainOrderNo" resultMap="java.lang.Double" parameterType="java.lang.String">
+	<select id="calcOccurByMainOrderNo" resultType="java.lang.Double" parameterType="java.lang.String">
 		SELECT IFNULL(SUM(IFNULL(trans_amt,0)),0) FROM hnp_out_money
 		WHERE main_order_no = #{mainOrderNo,jdbcType=VARCHAR}
 	</select>

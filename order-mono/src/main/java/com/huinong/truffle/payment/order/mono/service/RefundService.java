@@ -23,13 +23,14 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectStat
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.RedisKey;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.MainOrderReadDAO;
-import com.huinong.truffle.payment.order.mono.dao.read.OrderItemReadDAO;
+import com.huinong.truffle.payment.order.mono.dao.read.OrderReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
+import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
 import com.huinong.truffle.payment.order.mono.domain.DirectCash;
 import com.huinong.truffle.payment.order.mono.domain.HnpRefund;
 import com.huinong.truffle.payment.order.mono.domain.ReceiptCard;
-import com.huinong.truffle.payment.order.mono.entity.HnpDetailEntity;
+import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
 
@@ -44,16 +45,15 @@ public class RefundService {
 	public Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
 	@Autowired
-	private OrderItemReadDAO orderItemReadDAO ;
-	
-	@Autowired
 	private MainOrderReadDAO mainOrderReadDAO ;
-	
 	@Autowired
 	private OutInMoneyReadDAO outInMoneyReadDAO ;
-	
 	@Autowired
 	private OutInMoneyWriteDAO outInMoneyWriteDAO ;
+	@Autowired
+	private OrderReadDAO orderReadDAO ;
+	@Autowired
+	private OrderWriteDAO orderWriteDAO ;
 	
 
 	@Autowired
@@ -78,25 +78,27 @@ public class RefundService {
 				return BaseResult.fail(OrderResultCode.DB_0016);
 			}
 			// 1 校验子订单信息 （单笔订单信息）
-			HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(reqDTO.getSerialNumber());
-			if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
+			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(reqDTO.getSerialNumber());
+			/*HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(reqDTO.getSerialNumber());*/
+			/*if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
 				logger.info("订单号:{" + detailDTO.getOrderNo()+ "}付款单信息与支付底单信息不相符,请重新审核");
 				return BaseResult.fail(OrderResultCode.DB_0008);
-			}
-			if (!detailDTO.isSettled()) {
+			}*/
+			if (!orderEntity.isSettled()) {
 				logger.info("订单号:{" + reqDTO.getOrderNo() + "},流水号:{"+ reqDTO.getSerialNumber() + "} 还未结算，请核实");
 				return BaseResult.fail(OrderResultCode.DB_0009);
 			}
 			// 计算可用余额=入金支付总额-已发生额
 			// 校验退款买家的金额应小于或等于支付订单金额
-			HnpOrderEntity mainOrderDTO = mainOrderReadDAO.getDTOByUniqueValue(mainOrderNo);
-			if (null == mainOrderDTO) {
+			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
+			/*HnpOrderEntity mainOrderDTO = mainOrderReadDAO.getDTOByUniqueValue(mainOrderNo);*/
+			if (null == mainOrderEntity) {
 				return BaseResult.fail(OrderResultCode.DB_0005);
 			}
-			double lastBalance = mainOrderDTO.getTotalAmount().doubleValue();
+			double lastBalance = mainOrderEntity.getTotalAmt().doubleValue();
 			double occur = outInMoneyReadDAO.calcOccurByMainOrderNo(mainOrderNo);
 			double nextBalance = lastBalance - occur;
-			double receiveFee = detailDTO.getAmt().doubleValue();
+			double receiveFee = orderEntity.getAmt().doubleValue();
 			// 当前付款金额必须小于或等于当前余额
 			if (receiveFee > nextBalance) {
 				logger.info("当前付款金额大于平台可用余额,amt:" + receiveFee + ",balace:"+ nextBalance);
@@ -105,7 +107,7 @@ public class RefundService {
 
 			// 退款给买家
 			List<DirectCash> directCashlist = new ArrayList<DirectCash>();
-			BaseResult<DirectCash> payerCash = savePayerDirect(detailDTO.getOrderId(), reqDTO);
+			BaseResult<DirectCash> payerCash = savePayerDirect(orderEntity.getId(), reqDTO);
 			if (null == payerCash || payerCash.getData() == null || payerCash.getCode() != ResultCode.SUCCESS.getCode()) {
 				return new BaseResult<List<DirectCash>>(payerCash.getCode(),payerCash.getMsg());
 			}
@@ -114,7 +116,7 @@ public class RefundService {
 
 			// 判断是否为部分退款 退款给卖家
 			if (reqDTO.isPartRefund()) {
-				BaseResult<DirectCash> payeeCash = savePayeeDirect(detailDTO.getOrderId(), reqDTO);
+				BaseResult<DirectCash> payeeCash = savePayeeDirect(orderEntity.getId(), reqDTO);
 				if (null == payeeCash || payeeCash.getData() == null || payeeCash.getCode() != ResultCode.SUCCESS.getCode()) {
 					return new BaseResult<List<DirectCash>>(payeeCash.getCode(),payeeCash.getMsg());
 				}

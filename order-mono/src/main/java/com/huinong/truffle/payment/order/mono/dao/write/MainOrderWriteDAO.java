@@ -3,7 +3,7 @@ package com.huinong.truffle.payment.order.mono.dao.write;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
+import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 
 /**
  * @author peng
@@ -19,7 +19,8 @@ public interface MainOrderWriteDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public Long addMainOrder(HnpOrderEntity dto) throws Exception ;
+	public int insert(HnpMainOrderEntity record);
+	/*public Long addMainOrder(HnpOrderEntity dto) throws Exception ;*/
 	
 	
 	/**
@@ -29,7 +30,7 @@ public interface MainOrderWriteDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public int update (@Param("mainOrderNo") String mainOrderNo,@Param("orderStatus") Integer orderStatus) throws Exception ;
+	public int updateByMainOrderNo (HnpMainOrderEntity record) throws Exception ;
 	
 	
 	/**

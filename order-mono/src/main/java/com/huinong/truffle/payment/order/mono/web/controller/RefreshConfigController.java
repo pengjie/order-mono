@@ -5,7 +5,7 @@
  * Date:2017年3月29日上午11:43:53
  * Copyright (c) 2017, 2011-2016 Cnhnb B2B SYSTEM All Rights Reserved.
  *
-*/
+*//*
 package com.huinong.truffle.payment.order.mono.web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,3 +28,4 @@ public class RefreshConfigController {
 		return "订单信息:" + orderAppConf + "\r\n";
 	}
 }
+*/
