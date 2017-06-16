@@ -18,7 +18,7 @@ import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
-import com.huinong.truffle.payment.order.mono.component.zk.SerialGenFactory;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenZkImpl;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.CmbPayShopEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectEventEnum;
@@ -62,6 +62,8 @@ public class ConfirmService {
 	private OrderReadDAO orderReadDAO ;
 	@Autowired
 	private OrderWriteDAO orderWriteDAO ;
+	@Autowired
+	private SerialGenZkImpl serialGenZkImpl ;
 
 	
 	@Autowired
@@ -166,7 +168,7 @@ public class ConfirmService {
 			}
 
 			// 付款流水号
-			String paySerialNumber = SerialGenFactory.getInstance().genOutPaySerialNo();
+			String paySerialNumber = serialGenZkImpl.genOutPaySerialNo();
 			// 付款记录DTO
 			OutInMoneyEntity payRecordDTO = new OutInMoneyEntity();
 			payRecordDTO.setMainOrderNo(mainOrderNo);

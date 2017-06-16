@@ -3,7 +3,7 @@ package com.huinong.truffle.payment.order.mono.dao.read;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;

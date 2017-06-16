@@ -16,7 +16,7 @@ import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
-import com.huinong.truffle.payment.order.mono.component.zk.SerialGenFactory;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenZkImpl;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.CmbPayShopEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectEventEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectStateEnum;
@@ -54,6 +54,8 @@ public class RefundService {
 	private OrderReadDAO orderReadDAO ;
 	@Autowired
 	private OrderWriteDAO orderWriteDAO ;
+	@Autowired
+	private SerialGenZkImpl serialGenZkImpl ;
 	
 
 	@Autowired
@@ -233,7 +235,7 @@ public class RefundService {
 			}
 		}
 		
-		String serialNumber = SerialGenFactory.getInstance().genRefundSerialNo();
+		String serialNumber = serialGenZkImpl.genRefundSerialNo();
 		OutInMoneyEntity outInMoneyDTO = new OutInMoneyEntity();
 		outInMoneyDTO.setAccno(payerAccount);
 		outInMoneyDTO.setAccountName(payerName);
@@ -379,7 +381,7 @@ public class RefundService {
 			}
 		}
 		// 出金主表
-		String serialNumber = SerialGenFactory.getInstance().genRefundSerialNo();
+		String serialNumber = serialGenZkImpl.genRefundSerialNo();
 		// 出金明细表
 		OutInMoneyEntity outInMoneyDTO = new OutInMoneyEntity();
 		outInMoneyDTO.setAccno(payeeAccount);
