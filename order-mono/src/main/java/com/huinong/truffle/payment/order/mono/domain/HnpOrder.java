@@ -14,7 +14,7 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
  * @author peng
  *
  */
-@ApiModel("订单项对象")
+@ApiModel(value="HnpOrder" ,description="订单项对象")
 public class HnpOrder implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -39,20 +39,35 @@ public class HnpOrder implements Serializable {
 	@ApiModelProperty(value="支付描叙",required=false)
 	private String orderSummary;
     
+	@ApiModelProperty(value="子订单主键ID", hidden=true)
 	private Long id;
-    private Integer appId;
+	@ApiModelProperty(value="平台标识0" ,hidden=true)
+    private Integer appId = 0;
+	@ApiModelProperty(value="",hidden=true)
     private BigDecimal sysOffAmt;
+	@ApiModelProperty(value="",hidden=true)
     private BigDecimal payOffAmt;
+	@ApiModelProperty(value="",hidden=true)
     private Date orderTimestamp;
+	@ApiModelProperty(value="订单状态",hidden=true)
     private String payState;
+	@ApiModelProperty(value="删除状态",hidden=true)
     private Integer deleted;
+	@ApiModelProperty(value="hash",hidden=true)
     private String hash;
+	@ApiModelProperty(value="退款状态",hidden=true)
     private String refundState;
+	@ApiModelProperty(value="付款时间",hidden=true)
     private Date payedTimestamp;
+	@ApiModelProperty(value="付款完成时间",hidden=true)
     private Date finishedTimestamp;
+	@ApiModelProperty(value="付款关闭时间",hidden=true)
     private Date closedTimestamp;
+	@ApiModelProperty(value="退款时间",hidden=true)
     private Date refundTimestamp;
+	@ApiModelProperty(value="商家优惠金额",hidden=true)
     private BigDecimal merchantOffAmt;
+	@ApiModelProperty(value="子订单流水号",hidden=true)
     private String serialNumber;
 
     public Long getId() {

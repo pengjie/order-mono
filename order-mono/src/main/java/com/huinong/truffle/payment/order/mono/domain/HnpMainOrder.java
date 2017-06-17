@@ -23,6 +23,7 @@ public class HnpMainOrder implements Serializable {
 private static final long serialVersionUID = 1L;
 	
 	//主键ID
+	@ApiModelProperty(value="主键ID",hidden=true)
 	private Long id;
 	//主订单编号
 	@ApiModelProperty(value="主订单号",required=false)
@@ -40,10 +41,13 @@ private static final long serialVersionUID = 1L;
 	@ApiModelProperty(value="下单渠道(PC|IOS|AD|H5)",required=false)
     private String hnchannel;
     //订单状态
+	@ApiModelProperty(value="主订单状态",hidden=true)
     private Integer orderState;
     //创建时间
+	@ApiModelProperty(value="创建时间",hidden=true)
     private Date createTime;
     //修改时间
+	@ApiModelProperty(value="修改时间",hidden=true)
     private Date modifyTime;
     
     //订单明细

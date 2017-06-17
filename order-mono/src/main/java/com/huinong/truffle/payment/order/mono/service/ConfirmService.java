@@ -32,7 +32,7 @@ import com.huinong.truffle.payment.order.mono.dao.write.MainOrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
 import com.huinong.truffle.payment.order.mono.domain.HnpSetlDetail;
-import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
+import com.huinong.truffle.payment.order.mono.domain.HnpOutInMoney;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
@@ -70,7 +70,7 @@ public class ConfirmService {
 	@Autowired
 	private OrderAppConf orderAppConf;
 	
-	public BaseResult<OutInMoney> confirmReceipt(HnpSetlDetail reqDTO) throws Exception {
+	public BaseResult<HnpOutInMoney> confirmReceipt(HnpSetlDetail reqDTO) throws Exception {
 		if (null == reqDTO) {
 			logger.info("结算订单为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
@@ -78,14 +78,14 @@ public class ConfirmService {
 		// 校验参数
 		BaseResult<Void> checkMsgResult = checkReceiptReq(reqDTO);
 		if(null == checkMsgResult || checkMsgResult.getCode() != ResultCode.SUCCESS.getCode()){
-			return new BaseResult<OutInMoney>(checkMsgResult.getCode(),checkMsgResult.getMsg());
+			return new BaseResult<HnpOutInMoney>(checkMsgResult.getCode(),checkMsgResult.getMsg());
 		}
 		// 赋值参数
 		String orderSerialNumber = reqDTO.getSerialNumber();
 		String mainOrderNo = reqDTO.getMainOrderNo();
 		String orderNo = reqDTO.getOrderNo();
 		Double amt = reqDTO.getAmt();
-		Long appPayeeId = reqDTO.getAppPayeeId();
+		Long appPayeeId = Long.valueOf(reqDTO.getAppPayeeId());
 		// 收款人信息
 		String payeeAccount = reqDTO.getPayeeAccount();
 		String payeeName = reqDTO.getPayeeName();
@@ -121,7 +121,7 @@ public class ConfirmService {
 				}
 				if (outMoneyDTO.isPaying() || outMoneyDTO.isToPay()) {
 					// 处理中-->直接返回付款单信息，进行支付（先同步支付状态）
-					OutInMoney returnbean = new OutInMoney();
+					HnpOutInMoney returnbean = new HnpOutInMoney();
 					CopyBeanUtil.getInstance().copyBeanProperties(outMoneyDTO, returnbean);
 					return BaseResult.success(returnbean);
 				}
@@ -176,7 +176,7 @@ public class ConfirmService {
 				return BaseResult.fail(OrderResultCode.DB_0013);
 			}
 			// 组付款单-->调用付款接口
-			OutInMoney returnbean = new OutInMoney();
+			HnpOutInMoney returnbean = new HnpOutInMoney();
 			CopyBeanUtil.getInstance().copyBeanProperties(payRecordDTO, returnbean);
 			return BaseResult.success(returnbean);
 		} catch (Exception e) {
