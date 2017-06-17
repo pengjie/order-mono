@@ -119,4 +119,22 @@ public class OrderController extends BaseController{
 			return BaseResult.fail(OrderResultCode.SYS_0001);
 		}
     }
+    
+    /**
+     * 根据子订单流水号查询订单信息
+     * @param serialNumber
+     * @return
+     */
+    @ApiVersion(1)
+    @ApiOperation(value="查询订单详情-流水号", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
+    @ApiImplicitParams({
+    	@ApiImplicitParam(name = "serialNumber", value = "流水号", required = true, paramType="query", dataType = "String")
+    })
+    @RequestMapping(value = "/getDetail", method= RequestMethod.POST)
+    public BaseResult<HnpOrder> getHnpDetailBySerialNumber(String serialNumber){
+    	logger.info("[订单服务][根据流水号查询子订单信息]请求参数:serialNumber="+serialNumber);
+    	BaseResult<HnpOrder> result = orderService.queryBySerialNumber(serialNumber);
+    	logger.info("[订单服务][根据流水号查询子订单信息]返回参数:"+gson.toJson(result));
+    	return result;
+    }
 }

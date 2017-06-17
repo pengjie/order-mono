@@ -53,21 +53,6 @@ public class SetlController extends BaseController{
     @ApiVersion(1)
     @ApiOperation(value="确认收货", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回结算订单信息")
     @RequestMapping(value = "/receipt", method= RequestMethod.POST)
-    @ApiImplicitParams({
-    	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "appPayerId", value = "买家ID", required = true, paramType="query", dataType = "Long"),
-    	@ApiImplicitParam(name = "amt", value = "结算金额", required = true, paramType="query", dataType = "Double"),
-    	@ApiImplicitParam(name = "orderNo", value = "子订单号", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "appPayeeId", value = "卖家ID", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "payeeAccount", value = "收款人账号", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "payeeName", value = "收款人名称", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "bankFLG", value = "招商卡标志(Y-是 N-否)", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "payeeBankAddress", value = "收款人银行开户行地址", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "payeeBank", value = "收款人银行开户行", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "chargeFee", value = "手续费", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "type", value = "结算方向(0-付款 1-退款)", required = true, paramType="query", dataType = "String"),
-    	@ApiImplicitParam(name = "payChannel", value = "支付渠道(0-网银 2-快捷 6-支付宝 7-微信)", required = true, paramType="query", dataType = "String")
-    })
     public BaseResult<HnpOutMoney> confirmReceipt(HnpSetlDetail reqDTO){
         logger.info("[订单服务][确认收货]请求参数:"+gson.toJson(reqDTO));
         BaseResult<HnpOutMoney> resultDTO = new BaseResult<HnpOutMoney>();
@@ -90,14 +75,14 @@ public class SetlController extends BaseController{
     @ApiVersion(1)
     @ApiOperation(value="确认退款", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回退款订单信息")
     @RequestMapping(value = "/refund", method= RequestMethod.POST)
-    @ApiImplicitParams({
+    /*@ApiImplicitParams({
     	@ApiImplicitParam(name = "reqDTO", value = "订单退款对象", required = true, paramType="body", dataType = "HnpRefund")
-    })
-    public BaseResult<List<HnpOutMoney>> confirmRefund(HnpRefund reqDTO){
-        logger.info("[订单服务][确认退款]请求参数:"+gson.toJson(reqDTO));
+    })*/
+    public BaseResult<List<HnpOutMoney>> confirmRefund(HnpRefund hnpRefund){
+        logger.info("[订单服务][确认退款]请求参数:"+gson.toJson(hnpRefund));
         BaseResult<List<HnpOutMoney>> resultDTO;
 		try {
-			resultDTO = refundService.confirmRefund(reqDTO);
+			resultDTO = refundService.confirmRefund(hnpRefund);
 			logger.info("[订单服务][确认退款]返回参数:"+gson.toJson(resultDTO));
 			return resultDTO ;
 		} catch (Exception e) {
