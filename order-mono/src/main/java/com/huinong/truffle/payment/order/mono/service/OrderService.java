@@ -51,7 +51,7 @@ public class OrderService {
 	private DefRedisClient defRedisClient;
 
 	@Transactional
-	public BaseResult<HnpMainOrder> createOrder(HnpMainOrder mainOrder) {
+	public BaseResult<HnpMainOrder> createOrder(HnpMainOrder mainOrder) throws Exception {
 		if (null == mainOrder) {
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
 		}
@@ -112,7 +112,7 @@ public class OrderService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("创建订单异常："+e);
-			return BaseResult.fail(OrderResultCode.SYS_0001);
+			throw e ;
 		} finally {
 			if (lock != null) {
 				lock.unlock();
@@ -128,8 +128,6 @@ public class OrderService {
 	 * @throws Exception
 	 */
 	private BaseResult<HnpMainOrder> addOrderRecords(HnpMainOrder mainOrder) throws Exception {
-		/*HnpOrderEntity hnpOrderDTO = new HnpOrderEntity() ;
-		CopyBeanUtil.getInstance().copyBeanProperties(mainOrder, hnpOrderDTO);*/
 		// 3、验证子订单金额之和 是否等于 订单总金额
 		boolean isEqual = compareTwoAmtIsEqual(mainOrder.getData(),mainOrder.getTotalAmt().doubleValue());
 		if (!isEqual) {
@@ -152,14 +150,6 @@ public class OrderService {
 		}
 		addBatchItem(mainOrder.getData(),mainOrder.getSourceSys());
 		return BaseResult.success(mainOrder);
-		/*Long order_id = mainOrderWriteDAO.addMainOrder(hnpOrderDTO) ;
-		Long item_id = addBatchItem(hnpOrderDTO.getData(),hnpOrderDTO.getReq_from());
-		if (order_id > 0 && item_id > 0) {
-			return BaseResult.success(hnpOrderDTO);
-		} else {
-			logger.info("添加订单信息失败"); 
-			return BaseResult.fail(OrderResultCode.DB_0014);
-		}*/
 	}
 	
 	/**
@@ -208,10 +198,6 @@ public class OrderService {
 	 * 校验参数
 	 */
 	private BaseResult<Void> checkReqMsg(HnpMainOrder mainOrder) {
-		/*if (mainOrder.getAppId() == null){
-			logger.info("订单确认失败,平台标识为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0026);
-		}*/
 		if (StringUtils.isBlank(mainOrder.getSourceSys())){
 			logger.info("订单确认失败,平台来源为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0027);
@@ -316,7 +302,6 @@ public class OrderService {
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
 		}
 		HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
-		/*HnpOrderEntity hnpOrderDTO = mainOrderReadDAO.getDTOByUniqueValue(mainOrderNo);*/
 		if (null == mainOrderEntity) {
 			logger.info("查询订单不存在");
 			return BaseResult.fail(OrderResultCode.DB_0005);
@@ -335,7 +320,7 @@ public class OrderService {
 	}
 
 	@Transactional
-	public BaseResult<HnpMainOrder> finishOrder(String mainOrderNo,Integer orderStatus) {
+	public BaseResult<HnpMainOrder> finishOrder(String mainOrderNo,Integer orderStatus) throws Exception {
 		if (StringUtils.isBlank(mainOrderNo)) {
 			logger.info("参数{订单号}为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
@@ -348,8 +333,7 @@ public class OrderService {
 		RedisLock lock = null;
 		try {
 			// 0 对每一笔预支付订单进行锁处理，防止重复提交
-			lock = new RedisLock(defRedisClient,
-					OrderConstants.RedisKey.ORDER_REPAY_KEY.value.concat(mainOrderNo));
+			lock = new RedisLock(defRedisClient,OrderConstants.RedisKey.ORDER_FINISH_KEY.value.concat(mainOrderNo));
 			if (!lock.lock()) {
 				logger.info("订单：" + mainOrderNo + "更新状态超时");		
 				return BaseResult.fail(OrderResultCode.DB_0020);
@@ -380,18 +364,11 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return BaseResult.fail(OrderResultCode.DB_0022);
+			throw e ;
 		} finally {
 			if (lock != null) {
 				lock.unlock();
 			}
 		}
 	}
-
-	/*public BaseResult<Integer> updateOrderItem(HnpDetailEntity hnpDetailDTO)throws Exception {
-		int i = orderItemWriteDAO.updateOrderStatus(hnpDetailDTO);
-		if(i == 0) return BaseResult.fail(OrderResultCode.DB_0006);
-		return BaseResult.success(i);
-	}*/
-
 }

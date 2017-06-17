@@ -13,15 +13,6 @@
       #{orderState,jdbcType=TINYINT}, now(), now(),#{msgUUID,jdbcType=VARCHAR}
       )
   </insert>
-  
-	<!-- <insert id="addMainOrder" useGeneratedKeys="true" keyProperty="id" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity">
-		insert into hnp_main_order(main_order_no,source_sys,total_amt,out_uid,hnchannel,order_state,create_time,modify_time)
-		values(
-			 #{mainOrderNo,jdbcType=VARCHAR},#{req_from,jdbcType=VARCHAR},#{totalAmount,jdbcType=DECIMAL},
-			 #{appPayerId,jdbcType=BIGINT},#{hnchannel,jdbcType=VARCHAR},#{orderStatus,jdbcType=TINYINT},
-			 now(),now()
-		)
-	</insert> -->
 	
 	<!-- 更新主订单信息 -->
 	<update id="updateByMainOrderNo" parameterType = "com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity" >

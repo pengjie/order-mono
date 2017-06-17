@@ -15,10 +15,6 @@ import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
 @Repository
 public interface OutInMoneyWriteDAO {
 	
-	/*public static void main(String[] args) {
-		org.apache.ibatis.type.JdbcType.VARCHAR.name() ;
-	}*/
-	
 	/**
 	 * 添加结算制表单
 	 * @param entity

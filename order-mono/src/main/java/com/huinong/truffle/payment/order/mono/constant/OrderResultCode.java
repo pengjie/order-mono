@@ -64,6 +64,8 @@ public enum OrderResultCode implements ResultCodeIntf {
 	PARAM_0031(5031,"无法识别{收款卡信息}"),
 	PARAM_0032(5032,"无法识别{支付流水号}"),
 	PARAM_0033(5033,"无法识别{卖家金额}"),
+	PARAM_0034(5034,"无法识别{买卖家类型}"),
+	PARAM_0035(5035,"无法识别{主订单号}"),
 	//买家收款卡信息
 	;
 

@@ -31,11 +31,12 @@ import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.MainOrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
-import com.huinong.truffle.payment.order.mono.domain.DirectCash;
 import com.huinong.truffle.payment.order.mono.domain.HnpSetlDetail;
+import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
+import com.huinong.truffle.payment.order.mono.util.CopyBeanUtil;
 import com.huinong.truffle.payment.order.mono.util.MathUtils;
 
 /**
@@ -69,7 +70,7 @@ public class ConfirmService {
 	@Autowired
 	private OrderAppConf orderAppConf;
 	
-	public BaseResult<DirectCash> confirmReceipt(HnpSetlDetail reqDTO) throws Exception {
+	public BaseResult<OutInMoney> confirmReceipt(HnpSetlDetail reqDTO) throws Exception {
 		if (null == reqDTO) {
 			logger.info("结算订单为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
@@ -77,7 +78,7 @@ public class ConfirmService {
 		// 校验参数
 		BaseResult<Void> checkMsgResult = checkReceiptReq(reqDTO);
 		if(null == checkMsgResult || checkMsgResult.getCode() != ResultCode.SUCCESS.getCode()){
-			return new BaseResult<DirectCash>(checkMsgResult.getCode(),checkMsgResult.getMsg());
+			return new BaseResult<OutInMoney>(checkMsgResult.getCode(),checkMsgResult.getMsg());
 		}
 		// 赋值参数
 		String orderSerialNumber = reqDTO.getSerialNumber();
@@ -120,22 +121,9 @@ public class ConfirmService {
 				}
 				if (outMoneyDTO.isPaying() || outMoneyDTO.isToPay()) {
 					// 处理中-->直接返回付款单信息，进行支付（先同步支付状态）
-					DirectCash cashDTO = new DirectCash();
-					cashDTO.setOrderId(orderEntity.getId());
-					cashDTO.setAccno(outMoneyDTO.getAccno());
-					cashDTO.setAccountName(outMoneyDTO.getAccountName());
-					cashDTO.setAmt(outMoneyDTO.getAmount());
-					cashDTO.setBankFlg(outMoneyDTO.getBankFlg());
-					cashDTO.setDirectStatus(outMoneyDTO.getDirectStatus());
-					cashDTO.setMainOrderNo(outMoneyDTO.getMainOrderNo());
-					cashDTO.setReceiveBankAddr(outMoneyDTO.getReceiveBankAddr());
-					cashDTO.setReceiveBankName(outMoneyDTO.getReceiveBankAddr());
-					cashDTO.setSerialNumber(outMoneyDTO.getSerialNumber());
-					cashDTO.setTriggerTime(new Date());
-					cashDTO.setType(outMoneyDTO.getType());
-					cashDTO.setNeedAmt(outMoneyDTO.getTransAmt());
-					cashDTO.setHandCharge(outMoneyDTO.getFee());
-					return BaseResult.success(cashDTO);
+					OutInMoney returnbean = new OutInMoney();
+					CopyBeanUtil.getInstance().copyBeanProperties(outMoneyDTO, returnbean);
+					return BaseResult.success(returnbean);
 				}
 			}
 
@@ -183,30 +171,14 @@ public class ConfirmService {
 			payRecordDTO.setDirectStatus(DirectStateEnum.INITIAL.val);
 			payRecordDTO.setType(DirectEventEnum.DIRECT_PAY.val);
 			payRecordDTO.setBankFlg(bankFLG);
-			
 			int i = outInMoneyWriteDAO.addOneOutInMoney(payRecordDTO);
 			if (i == 0) {
 				return BaseResult.fail(OrderResultCode.DB_0013);
 			}
-
 			// 组付款单-->调用付款接口
-			DirectCash cashDTO = new DirectCash();
-			cashDTO.setOrderId(orderEntity.getId());
-			cashDTO.setAccno(payeeAccount);
-			cashDTO.setAccountName(payeeName);
-			cashDTO.setAmt(amt);
-			cashDTO.setBankFlg(bankFLG);
-			cashDTO.setDirectStatus(DirectStateEnum.INITIAL.val);
-			cashDTO.setMainOrderNo(mainOrderNo);
-			cashDTO.setReceiveBankAddr(payeeBankAddress);
-			cashDTO.setReceiveBankName(payeeBank);
-			cashDTO.setSerialNumber(paySerialNumber);
-			cashDTO.setTriggerTime(new Date());
-			cashDTO.setType(DirectEventEnum.DIRECT_PAY.val);
-			cashDTO.setNeedAmt(receiveFee);
-			cashDTO.setHandCharge(chargeFee);
-			
-			return BaseResult.success(cashDTO);
+			OutInMoney returnbean = new OutInMoney();
+			CopyBeanUtil.getInstance().copyBeanProperties(payRecordDTO, returnbean);
+			return BaseResult.success(returnbean);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e ;
@@ -248,58 +220,47 @@ public class ConfirmService {
 			logger.info("丢失关键字{买家ID}");
 			return BaseResult.fail(OrderResultCode.PARAM_0007);
 		}
-
 		if(null == reqDTO.getAmt()){
 			logger.info("丢失关键字{结算总额}");
 			return BaseResult.fail(OrderResultCode.PARAM_0008);
 		}
-
 		if(StringUtils.isBlank(reqDTO.getOrderNo())){
 			logger.info("丢失关键字{子订单编号}");
 			return BaseResult.fail(OrderResultCode.PARAM_0009);
 		}
-		
 		if(null == reqDTO.getAppPayeeId()){
 			logger.info("丢失关键字{卖家ID}");
 			return BaseResult.fail(OrderResultCode.PARAM_0010);
 		}
-		// 验证收款人信息
 		if(StringUtils.isBlank(reqDTO.getPayeeAccount())){
 			logger.info("丢失关键字{收款人账号}");
 			return BaseResult.fail(OrderResultCode.PARAM_0011);
 		}
-
 		if(StringUtils.isBlank(reqDTO.getPayeeName())){
 			logger.info("丢失关键字{收款人名称}");
 			return BaseResult.fail(OrderResultCode.PARAM_0012);
 		}
-		
 		if(StringUtils.isBlank(reqDTO.getBankFLG())){
 			logger.info("丢失关键字{招商卡标志}");
 			return BaseResult.fail(OrderResultCode.PARAM_0013);
 		}
-
 		if(StringUtils.isBlank(reqDTO.getPayeeBankAddress())){
 			logger.info("丢失关键字{收款银行开户行地址}");
 			return BaseResult.fail(OrderResultCode.PARAM_0014);
 		}
-
 		if(StringUtils.isBlank(reqDTO.getPayeeBank())){
 			logger.info("丢失关键字{收款银行开户银行}");
 			return BaseResult.fail(OrderResultCode.PARAM_0015);
 		}
-
 		// 追加关联字段数据冗余
 		if(null == reqDTO.getChargeFee()){
 			logger.info("丢失关键字{手续费}");
 			return BaseResult.fail(OrderResultCode.PARAM_0016);
 		}
-
 		if(StringUtils.isBlank(reqDTO.getType())){
 			logger.info("丢失关键字{结算方向}");
 			return BaseResult.fail(OrderResultCode.PARAM_0017);
 		}
-
 		if(StringUtils.isBlank(reqDTO.getPayChannel())){
 			logger.info("丢失关键字{支付渠道}");
 			return BaseResult.fail(OrderResultCode.PARAM_0018);
