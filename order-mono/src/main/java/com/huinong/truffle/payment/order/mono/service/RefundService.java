@@ -80,20 +80,18 @@ public class RefundService {
 				return BaseResult.fail(OrderResultCode.DB_0016);
 			}
 			// 1 校验子订单信息 （单笔订单信息）
-			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(reqDTO.getSerialNumber());
-			/*HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(reqDTO.getSerialNumber());*/
-			/*if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
-				logger.info("订单号:{" + detailDTO.getOrderNo()+ "}付款单信息与支付底单信息不相符,请重新审核");
-				return BaseResult.fail(OrderResultCode.DB_0008);
-			}*/
+			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(orderSerialNumber);
+			if(null == orderEntity){
+				logger.info("订单：" + mainOrderNo + "在库中信息不存在");
+				return BaseResult.fail(OrderResultCode.DB_0023);
+			}
 			if (!orderEntity.isSettled()) {
-				logger.info("订单号:{" + reqDTO.getOrderNo() + "},流水号:{"+ reqDTO.getSerialNumber() + "} 还未结算，请核实");
+				logger.info("订单号:{" + reqDTO.getOrderNo() + "},流水号:{"+ orderSerialNumber + "} 还未结算，请核实");
 				return BaseResult.fail(OrderResultCode.DB_0009);
 			}
 			// 计算可用余额=入金支付总额-已发生额
 			// 校验退款买家的金额应小于或等于支付订单金额
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
-			/*HnpOrderEntity mainOrderDTO = mainOrderReadDAO.getDTOByUniqueValue(mainOrderNo);*/
 			if (null == mainOrderEntity) {
 				return BaseResult.fail(OrderResultCode.DB_0005);
 			}

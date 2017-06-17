@@ -31,6 +31,7 @@ public enum OrderResultCode implements ResultCodeIntf {
 	DB_0020(4020,"订单预支付超时"),
 	DB_0021(4021,"对象转换异常"),
 	DB_0022(4022,"完结订单异常"),
+	DB_0023(4023,"检索的订单结果为空"),
     
     //入参参数异常 5
 	PARAM_0002(5002,"订单项参数为空"),

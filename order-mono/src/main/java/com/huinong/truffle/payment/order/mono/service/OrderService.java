@@ -58,11 +58,10 @@ public class OrderService {
 		if(null == mainOrder.getData()){
 			return BaseResult.fail(OrderResultCode.PARAM_0002);
 		}
-
 		RedisLock lock = null;
 		try {
 			// 0 对每一笔预支付订单进行锁处理，防止重复提交
-			String mainOrderNo = mainOrder.getMainOrderNo();/* (String) orderMap.get(ReqParamEnum.REQ_PARAM_ORDER_NO.val);*/
+			String mainOrderNo = mainOrder.getMainOrderNo();
 			lock = new RedisLock(defRedisClient,OrderConstants.RedisKey.ORDER_REPAY_KEY.value.concat(mainOrderNo));
 			if (!lock.lock()) {
 				logger.info("订单：" + mainOrderNo + "预支付超时...");
@@ -70,7 +69,6 @@ public class OrderService {
 			}
 			// 1 检测
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
-			/*HnpOrderEntity qOrderDTO = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);*/
 			if (null != mainOrderEntity) {
 				// 判断订单状态
 				if (!mainOrderEntity.isWaitingConfirm()) {
@@ -78,24 +76,28 @@ public class OrderService {
 					return BaseResult.fail(OrderResultCode.DB_0002);
 				}
 				// 重新预支付订单在订单存在情况下需要确认订单数据是否一致
-				/*HnpOrderEntity hnpOrderDTO = RespResultParser.parse2Obj(orderMap.toString(), new TypeToken<HnpOrderEntity>() {});*/
-				// 校验参数
-				BaseResult<Void> checkMsgResp = checkReqMsg(mainOrder);
-				if(checkMsgResp.getCode() != ResultCode.SUCCESS.getCode()){
-					return new BaseResult<HnpMainOrder>(checkMsgResp.getCode(),checkMsgResp.getMsg());
+				if(mainOrderEntity.getMsgUUID().equals(mainOrder.getObjectUUID())){
+					//数据一致 直接返回订单信息
+					HnpMainOrder returnbean = new HnpMainOrder();
+					CopyBeanUtil.getInstance().copyBeanProperties(mainOrderEntity, returnbean);
+					return BaseResult.success(returnbean);
+				}else{
+					//数据不一致 删除该订单下的信息，重新创建订单
+					BaseResult<Void> checkMsgResp = checkReqMsg(mainOrder);
+					if(checkMsgResp.getCode() != ResultCode.SUCCESS.getCode()){
+						return new BaseResult<HnpMainOrder>(checkMsgResp.getCode(),checkMsgResp.getMsg());
+					}
+					// 删除以前的主订单和明细数据 加入新的订单信息
+					mainOrderWriteDAO.delMainOrder(mainOrderEntity.getId());
+					orderWriteDAO.deleteByMainOrderNo(mainOrderNo);
+					// 新增订单信息
+					BaseResult<HnpMainOrder> mainOrderResult = addOrderRecords(mainOrder);
+					if(null == mainOrderResult || mainOrderResult.getCode() != ResultCode.SUCCESS.getCode()){
+						return new BaseResult<HnpMainOrder>(mainOrderResult.getCode(),mainOrderResult.getMsg());
+					}
+					return BaseResult.success(mainOrderResult.getData());
 				}
-				
-				// 删除以前的主订单和明细数据 加入新的订单信息
-				mainOrderWriteDAO.delMainOrder(mainOrderEntity.getId());
-				orderWriteDAO.deleteByMainOrderNo(mainOrderNo);
-				// 新增订单信息
-				BaseResult<HnpMainOrder> mainOrderResult = addOrderRecords(mainOrder);
-				if(null == mainOrderResult || mainOrderResult.getCode() != ResultCode.SUCCESS.getCode()){
-					return new BaseResult<HnpMainOrder>(mainOrderResult.getCode(),mainOrderResult.getMsg());
-				}
-				return BaseResult.success(mainOrderResult.getData());
 			} else {// 新增
-				//HnpOrderEntity hnpOrderDTO = RespResultParser.parse2Obj(orderMap.toString(), new TypeToken<HnpOrderEntity>() {});
 				BaseResult<Void> checkMsgResp = checkReqMsg(mainOrder);
 				if(checkMsgResp.getCode() != ResultCode.SUCCESS.getCode()){
 					return new BaseResult<HnpMainOrder>(checkMsgResp.getCode(),checkMsgResp.getMsg());
@@ -353,6 +355,12 @@ public class OrderService {
 				return BaseResult.fail(OrderResultCode.DB_0020);
 			}
 			
+			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
+			if(null == mainOrderEntity){
+				logger.info("订单：" + mainOrderNo + "检索订单结果为空");
+				return BaseResult.fail(OrderResultCode.DB_0023);
+			}
+			
 			HnpMainOrderEntity mainRecord = new HnpMainOrderEntity();
 			mainRecord.setMainOrderNo(mainOrderNo);
 			mainRecord.setOrderState(orderStatus);
@@ -363,8 +371,6 @@ public class OrderService {
 			orderRecord.setPayState(String.valueOf(orderStatus));
 			int j = orderWriteDAO.updateByMainOrderNoSelective(orderRecord);
 			if (i > 0 && j > 0) {
-				HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
-				
 				HnpMainOrder mainOrder = new HnpMainOrder();
 				CopyBeanUtil.getInstance().copyBeanProperties(mainOrderEntity, mainOrder);
 				return BaseResult.success(mainOrder);

@@ -74,42 +74,35 @@ public class ConfirmService {
 			logger.info("结算订单为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
 		}
+		// 校验参数
+		BaseResult<Void> checkMsgResult = checkReceiptReq(reqDTO);
+		if(null == checkMsgResult || checkMsgResult.getCode() != ResultCode.SUCCESS.getCode()){
+			return new BaseResult<DirectCash>(checkMsgResult.getCode(),checkMsgResult.getMsg());
+		}
+		// 赋值参数
+		String orderSerialNumber = reqDTO.getSerialNumber();
+		String mainOrderNo = reqDTO.getMainOrderNo();
+		String orderNo = reqDTO.getOrderNo();
+		Double amt = reqDTO.getAmt();
+		Long appPayeeId = reqDTO.getAppPayeeId();
+		// 收款人信息
+		String payeeAccount = reqDTO.getPayeeAccount();
+		String payeeName = reqDTO.getPayeeName();
+		String bankFLG = reqDTO.getBankFLG();
+		String payeeBankAddress = reqDTO.getPayeeBankAddress();
+		String payeeBank = reqDTO.getPayeeBank();
+		String payChannel = reqDTO.getPayChannel();
+		
 		RedisLock lock = null;
 		try {
-			// 校验参数
-			BaseResult<Void> checkMsgResult = checkReceiptReq(reqDTO);
-			if(null == checkMsgResult || checkMsgResult.getCode() != ResultCode.SUCCESS.getCode()){
-				return new BaseResult<DirectCash>(checkMsgResult.getCode(),checkMsgResult.getMsg());
-			}
-			// 赋值参数
-			String orderSerialNumber = reqDTO.getSerialNumber();
-			String mainOrderNo = reqDTO.getMainOrderNo();
-			String orderNo = reqDTO.getOrderNo();
-			Double amt = reqDTO.getAmt();
-			Long appPayeeId = reqDTO.getAppPayeeId();
-			// 收款人信息
-			String payeeAccount = reqDTO.getPayeeAccount();
-			String payeeName = reqDTO.getPayeeName();
-			String bankFLG = reqDTO.getBankFLG();
-			String payeeBankAddress = reqDTO.getPayeeBankAddress();
-			String payeeBank = reqDTO.getPayeeBank();
-			String payChannel = reqDTO.getPayChannel();
-
 			// 0 对每一笔预支付订单进行锁处理，防止重复提交
 			lock = new RedisLock(defRedisClient,OrderConstants.RedisKey.ORDER_SETL_KEY.value.concat(orderSerialNumber));
 			if (!lock.lock()) {
 				logger.info("订单：" + orderNo + "結算超时...");
 				return BaseResult.fail(OrderResultCode.DB_0007);
 			}
-
 			// 1 校验子订单信息 （单笔订单信息）
 			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(orderSerialNumber);
-			/*HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(orderSerialNumber);*/
-			// 验证提交付款的订单信息与支付订单信息是否吻合
-			/*if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
-				logger.info("订单号:{" + detailDTO.getOrderNo()+ "}付款单信息与支付底单信息不相符,请重新审核");
-				return BaseResult.fail(OrderResultCode.DB_0008);
-			}*/
 			if (!orderEntity.isSettled()) {
 				logger.info("订单号:{" + orderEntity.getOrderId() + "},流水号:{"+ orderEntity.getSerialNumber() + "} 还未到帐，请核实");
 				return BaseResult.fail(OrderResultCode.DB_0009);

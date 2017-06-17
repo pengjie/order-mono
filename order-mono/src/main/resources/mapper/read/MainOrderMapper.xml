@@ -11,13 +11,14 @@
 	    <result column="order_state" property="orderState" jdbcType="TINYINT" />
 	    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
 	    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	    <result column="msg_uuid" property="msgUUID" jdbcType="VARCHAR" />
 	</resultMap>
 
 	<!-- <parameterMap id="Person" type="com.huinong.gateway.access.entity.Person"/> -->
 
 	<sql id="Base_Column_List">
 	    id, main_order_no, source_sys, total_amt, out_uid, hnchannel, order_state, create_time, 
-	    modify_time
+	    modify_time,msg_uuid
 	</sql>
 
 	<!-- 根据主订单号查询订单信息 -->

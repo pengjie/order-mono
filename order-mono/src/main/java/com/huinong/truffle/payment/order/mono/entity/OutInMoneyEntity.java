@@ -76,7 +76,7 @@ public class OutInMoneyEntity implements Serializable {
 	
 	//查询库，返回错误信息
 	private String resMessage;
-
+	
 	public String getMainOrderNo() {
 		return mainOrderNo;
 	}
