@@ -8,6 +8,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.huinong.truffle.payment.order.mono.util.MD5Util;
+
 /**
  * 主订单信息
  * @author peng
@@ -106,4 +110,19 @@ private static final long serialVersionUID = 1L;
 	public void setData(List<HnpOrder> data) {
 		this.data = data;
 	}
+	
+	/**
+     * 获取对象内容的UUID 用于前后两次交互比较
+     */
+    public String getObjectUUID(){
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(0);
+        buffer.append(StringUtils.isBlank(sourceSys) ? "req_from":sourceSys);
+        buffer.append(StringUtils.isBlank(mainOrderNo) ? "mainOrderNo":mainOrderNo);
+        buffer.append(null == totalAmt ? "totalAmount":totalAmt);
+        buffer.append(null == outUid ? "appPayerId":outUid);
+        buffer.append(StringUtils.isBlank(hnchannel) ? "hnchannel":hnchannel);
+        buffer.append((data == null || data.size()==0) ? "data":data);
+        return MD5Util.MD5Encode(buffer.toString(), "UTF-8").toUpperCase();
+    }
 }

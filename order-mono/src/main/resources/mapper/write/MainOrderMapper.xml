@@ -6,26 +6,17 @@
 	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity" >
     insert into hnp_main_order (main_order_no, source_sys, 
       total_amt, out_uid, hnchannel, 
-      order_state, create_time, modify_time
+      order_state, create_time, modify_time,msg_uuid
       )
     values (#{mainOrderNo,jdbcType=VARCHAR}, #{sourceSys,jdbcType=VARCHAR}, 
       #{totalAmt,jdbcType=DECIMAL}, #{outUid,jdbcType=BIGINT}, #{hnchannel,jdbcType=VARCHAR}, 
-      #{orderState,jdbcType=TINYINT}, now(), now()
+      #{orderState,jdbcType=TINYINT}, now(), now(),#{msgUUID,jdbcType=VARCHAR}
       )
   </insert>
-  
-	<!-- <insert id="addMainOrder" useGeneratedKeys="true" keyProperty="id" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity">
-		insert into hnp_main_order(main_order_no,source_sys,total_amt,out_uid,hnchannel,order_state,create_time,modify_time)
-		values(
-			 #{mainOrderNo,jdbcType=VARCHAR},#{req_from,jdbcType=VARCHAR},#{totalAmount,jdbcType=DECIMAL},
-			 #{appPayerId,jdbcType=BIGINT},#{hnchannel,jdbcType=VARCHAR},#{orderStatus,jdbcType=TINYINT},
-			 now(),now()
-		)
-	</insert> -->
 	
 	<!-- 更新主订单信息 -->
 	<update id="updateByMainOrderNo" parameterType = "com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity" >
-		update hnp_main_order set modify_time = now(),order_status = #{orderState,jdbcType=TINYINT}
+		update hnp_main_order set modify_time = now(),order_state = #{orderState,jdbcType=TINYINT}
 		where main_order_no = #{mainOrderNo,jdbcType=VARCHAR}
 	</update>
 	

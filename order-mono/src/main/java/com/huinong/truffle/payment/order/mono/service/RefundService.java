@@ -2,7 +2,9 @@ package com.huinong.truffle.payment.order.mono.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,9 +16,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
+import com.huinong.truffle.component.base.constants.ResultCodeIntf;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
-import com.huinong.truffle.payment.order.mono.component.zk.SerialGenFactory;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenZkImpl;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.CmbPayShopEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectEventEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DirectStateEnum;
@@ -27,12 +30,14 @@ import com.huinong.truffle.payment.order.mono.dao.read.OrderReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
-import com.huinong.truffle.payment.order.mono.domain.DirectCash;
 import com.huinong.truffle.payment.order.mono.domain.HnpRefund;
+import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
 import com.huinong.truffle.payment.order.mono.domain.ReceiptCard;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
+import com.huinong.truffle.payment.order.mono.util.CopyBeanUtil;
+import com.huinong.truffle.payment.order.mono.util.ParamHandler;
 
 /**
  * 退款-结算订单
@@ -54,12 +59,14 @@ public class RefundService {
 	private OrderReadDAO orderReadDAO ;
 	@Autowired
 	private OrderWriteDAO orderWriteDAO ;
+	@Autowired
+	private SerialGenZkImpl serialGenZkImpl ;
 	
 
 	@Autowired
 	private DefRedisClient defRedisClient;
 	
-	public BaseResult<List<DirectCash>> confirmRefund(HnpRefund reqDTO) throws Exception {
+	public BaseResult<List<OutInMoney>> confirmRefund(HnpRefund reqDTO) throws Exception {
 		String mainOrderNo = reqDTO.getMainOrderNo();
 		if (StringUtils.isBlank(mainOrderNo)) {
 			return BaseResult.fail(OrderResultCode.PARAM_0006);
@@ -77,21 +84,20 @@ public class RefundService {
 				logger.info("订单：" + mainOrderNo + "退款超时...");
 				return BaseResult.fail(OrderResultCode.DB_0016);
 			}
+			
 			// 1 校验子订单信息 （单笔订单信息）
-			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(reqDTO.getSerialNumber());
-			/*HnpDetailEntity detailDTO = orderItemReadDAO.getDTOByUniqueValue(reqDTO.getSerialNumber());*/
-			/*if (!reqDTO.getObjectUUID().equals(detailDTO.getObjectUUID())) {
-				logger.info("订单号:{" + detailDTO.getOrderNo()+ "}付款单信息与支付底单信息不相符,请重新审核");
-				return BaseResult.fail(OrderResultCode.DB_0008);
-			}*/
+			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(orderSerialNumber);
+			if(null == orderEntity){
+				logger.info("订单：" + mainOrderNo + "在库中信息不存在");
+				return BaseResult.fail(OrderResultCode.DB_0023);
+			}
 			if (!orderEntity.isSettled()) {
-				logger.info("订单号:{" + reqDTO.getOrderNo() + "},流水号:{"+ reqDTO.getSerialNumber() + "} 还未结算，请核实");
+				logger.info("订单号:{" + reqDTO.getOrderNo() + "},流水号:{"+ orderSerialNumber + "} 还未结算，请核实");
 				return BaseResult.fail(OrderResultCode.DB_0009);
 			}
 			// 计算可用余额=入金支付总额-已发生额
 			// 校验退款买家的金额应小于或等于支付订单金额
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
-			/*HnpOrderEntity mainOrderDTO = mainOrderReadDAO.getDTOByUniqueValue(mainOrderNo);*/
 			if (null == mainOrderEntity) {
 				return BaseResult.fail(OrderResultCode.DB_0005);
 			}
@@ -106,22 +112,50 @@ public class RefundService {
 			}
 
 			// 退款给买家
-			List<DirectCash> directCashlist = new ArrayList<DirectCash>();
-			BaseResult<DirectCash> payerCash = savePayerDirect(orderEntity.getId(), reqDTO);
-			if (null == payerCash || payerCash.getData() == null || payerCash.getCode() != ResultCode.SUCCESS.getCode()) {
-				return new BaseResult<List<DirectCash>>(payerCash.getCode(),payerCash.getMsg());
+			List<OutInMoney> directCashlist = new ArrayList<OutInMoney>();
+			//组买家信息
+			Map<String,Object> payerMap = new HashMap<String,Object>();
+			payerMap.put("amt",reqDTO.getPayerAmt());
+			payerMap.put("transAmt", reqDTO.getPayerAmt());
+			payerMap.put("mainOrderNo", reqDTO.getMainOrderNo());
+			payerMap.put("orderNo", reqDTO.getOrderNo());
+			payerMap.put("orderSerialNumber", orderSerialNumber);
+			payerMap.put("payChannel", reqDTO.getPayChannel());
+			payerMap.put("userId", reqDTO.getAppPayerId());
+			payerMap.put("userType", CmbPayShopEnum.CMB_PAY_SHOP_BUYER.val);
+			//验证买家信息
+			BaseResult<Void> payerCheckResult = checkReqMsg(payerMap, reqDTO.getPayerReceiptCard());
+			if(null == payerCheckResult || payerCheckResult.getCode()  != ResultCode.SUCCESS.getCode()){
+				return new BaseResult<List<OutInMoney>>(payerCheckResult.getCode(),payerCheckResult.getMsg());
 			}
-			DirectCash cashDTO = payerCash.getData();
-			directCashlist.add(cashDTO);
-
+			BaseResult<OutInMoney> payerResult = saveOutMoney(payerMap, reqDTO.getPayerReceiptCard());
+			if (null == payerResult || payerResult.getData() == null || payerResult.getCode() != ResultCode.SUCCESS.getCode()) {
+				return new BaseResult<List<OutInMoney>>(payerResult.getCode(),payerResult.getMsg());
+			}
+			directCashlist.add(payerResult.getData());
+			
 			// 判断是否为部分退款 退款给卖家
 			if (reqDTO.isPartRefund()) {
-				BaseResult<DirectCash> payeeCash = savePayeeDirect(orderEntity.getId(), reqDTO);
-				if (null == payeeCash || payeeCash.getData() == null || payeeCash.getCode() != ResultCode.SUCCESS.getCode()) {
-					return new BaseResult<List<DirectCash>>(payeeCash.getCode(),payeeCash.getMsg());
+				//组卖家信息
+				Map<String,Object> payeeMap = new HashMap<String,Object>();
+				payeeMap.put("amt",reqDTO.getPayeeAmt());
+				payeeMap.put("transAmt", reqDTO.getPayeeAmt());
+				payeeMap.put("mainOrderNo", reqDTO.getMainOrderNo());
+				payeeMap.put("orderNo", reqDTO.getOrderNo());
+				payeeMap.put("orderSerialNumber", orderSerialNumber);
+				payeeMap.put("payChannel", reqDTO.getPayChannel());
+				payeeMap.put("userId", reqDTO.getAppPayeeId());
+				payeeMap.put("userType", CmbPayShopEnum.CMB_PAY_SHOP_SELLER.val);
+				//验证买家信息
+				BaseResult<Void> payeeCheckResult = checkReqMsg(payerMap, reqDTO.getPayerReceiptCard());
+				if(null == payeeCheckResult || payeeCheckResult.getCode()  != ResultCode.SUCCESS.getCode()){
+					return new BaseResult<List<OutInMoney>>(payeeCheckResult.getCode(),payeeCheckResult.getMsg());
 				}
-				cashDTO = payeeCash.getData() ;
-				directCashlist.add(cashDTO);
+				BaseResult<OutInMoney> payeeResult = saveOutMoney(payeeMap, reqDTO.getPayeeReceiptCard());
+				if (null == payeeResult || payeeResult.getData() == null || payeeResult.getCode() != ResultCode.SUCCESS.getCode()) {
+					return new BaseResult<List<OutInMoney>>(payeeResult.getCode(),payeeResult.getMsg());
+				}
+				directCashlist.add(payeeResult.getData());
 			}
 			return BaseResult.success(directCashlist);
 		} catch (Exception e) {
@@ -135,293 +169,151 @@ public class RefundService {
 	}
 	
 	/**
-	 * 退款-保存买家出金记录
-	 * 
-	 * @param orderId
-	 * @param mainOrderNo
-	 * @param payeeAmt
+	 * 验证入参
+	 * @param orderMap
 	 * @param receiptCard
 	 * @return
 	 */
-	private BaseResult<DirectCash> savePayerDirect(Long orderId,HnpRefund reqDTO) throws Exception {
-		ReceiptCard receiptCard = reqDTO.getPayerReceiptCard();
-		Double payerAmt = reqDTO.getPayerAmt();
-		if (null == payerAmt) {
-			logger.info("丢失关键字{买家金额}");
-			return BaseResult.fail(OrderResultCode.PARAM_0019);
+	private BaseResult<Void> checkReqMsg(Map<String,Object> orderMap, ReceiptCard receiptCard){
+		ParamHandler param = new ParamHandler(orderMap);
+		//买家类型
+		String userType = param.getString("userType");
+		if(StringUtils.isBlank(userType)){
+			logger.info("无法识别{用户类型:买卖家}");
+			return BaseResult.fail(OrderResultCode.PARAM_0034);
 		}
-		if (null == receiptCard) {
-			logger.info("丢失关键字{买家收款卡信息}"); 
-			return BaseResult.fail(OrderResultCode.PARAM_0031);
-		}
-		String payerAccount = receiptCard.getReceiptAccount();
-		if (StringUtils.isBlank(payerAccount)) {
-			logger.info("丢失关键字{买家收款卡账号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0031);
-		}
-		String payerName = receiptCard.getReceiptName();
-		if (StringUtils.isBlank(payerName)) {
-			logger.info("丢失关键字{买家收款卡人姓名}"); 
-			return BaseResult.fail(OrderResultCode.PARAM_0012);
-		}
-		String bankFLG = receiptCard.getBankFLG();
-		if (StringUtils.isBlank(bankFLG)) {
-			logger.info("丢失关键字{招商银行标志}");
-			return BaseResult.fail(OrderResultCode.PARAM_0013);
-		}
-		String payerBankAddress = receiptCard.getReceiptBankAddress();
-		if (StringUtils.isBlank(payerBankAddress)) {
-			logger.info("丢失关键字{买家收款行开户地址}");
-			return BaseResult.fail(OrderResultCode.PARAM_0013);
-		}
-		String payerBank = receiptCard.getReceiptBank();
-		if (StringUtils.isBlank(payerBankAddress)) {
-			logger.info("丢失关键字{买家收款行开户地址}");
-			return BaseResult.fail(OrderResultCode.PARAM_0014);
-		}
-		String mainOrderNo = reqDTO.getMainOrderNo();
-		if (StringUtils.isBlank(mainOrderNo)) {
-			logger.info("丢失关键字{结算订单号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0014);
-		}
-		Long appPayeeId = reqDTO.getAppPayeeId();
-		if (null == appPayeeId) {
-			logger.info("丢失关键字{卖家ID}");
-			return BaseResult.fail(OrderResultCode.PARAM_0010);
-		}
-		Long appPayerId = reqDTO.getAppPayerId();
-		String orderNo = reqDTO.getOrderNo();
-		if (StringUtils.isBlank(orderNo)) {
-			logger.info("丢失关键字{订单编号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0006);
-		}
-		String paymentNo = reqDTO.getPaymentNo();
-		if (StringUtils.isBlank(paymentNo)) {
-			logger.info("丢失关键字{支付单号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0032);
-		}
-		String orderSerialNumber = reqDTO.getSerialNumber();
-		// 2校验子订单流水在付款记录表中的状态
-		OutInMoneyEntity outMoneyDTO = outInMoneyReadDAO.getByOrderSerialNumber(orderSerialNumber,CmbPayShopEnum.CMB_PAY_SHOP_BUYER.val);
-		if (null != outMoneyDTO) {
-			if (outMoneyDTO.isPayFail()) {
-				logger.info("订单号：" + orderNo + "付款失败,msg："+ outMoneyDTO.getResMessage());
-				return BaseResult.fail(OrderResultCode.DB_0010);
-			}
-			if (outMoneyDTO.isPaySuc()) {
-				logger.info("订单号：" + orderNo + "付款成功,请勿重复提交");
-				return BaseResult.fail(OrderResultCode.DB_0011);
-			}
-			if (outMoneyDTO.isPaying() || outMoneyDTO.isToPay()) {
-				// 处理中-->直接返回付款单信息，进行支付（先同步支付状态）
-				DirectCash cashDTO = new DirectCash();
-				cashDTO.setOrderId(orderId);
-				cashDTO.setAccno(outMoneyDTO.getAccno());
-				cashDTO.setAccountName(outMoneyDTO.getAccountName());
-				cashDTO.setAmt(outMoneyDTO.getAmount());
-				cashDTO.setBankFlg(outMoneyDTO.getBankFlg());
-				cashDTO.setDirectStatus(outMoneyDTO.getDirectStatus());
-				cashDTO.setMainOrderNo(outMoneyDTO.getMainOrderNo());
-				cashDTO.setReceiveBankAddr(outMoneyDTO.getReceiveBankAddr());
-				cashDTO.setReceiveBankName(outMoneyDTO.getReceiveBankAddr());
-				cashDTO.setSerialNumber(outMoneyDTO.getSerialNumber());
-				cashDTO.setTriggerTime(new Date());
-				cashDTO.setType(outMoneyDTO.getType());
-				cashDTO.setNeedAmt(outMoneyDTO.getTransAmt());
-				cashDTO.setHandCharge(outMoneyDTO.getFee());
-				return BaseResult.success(cashDTO);
-			}
-		}
+		//错误码
+		ResultCodeIntf errCode = null ;
+		boolean payerFlag = userType.equals(CmbPayShopEnum.CMB_PAY_SHOP_BUYER.val) ? true:false ;
 		
-		String serialNumber = SerialGenFactory.getInstance().genRefundSerialNo();
-		OutInMoneyEntity outInMoneyDTO = new OutInMoneyEntity();
-		outInMoneyDTO.setAccno(payerAccount);
-		outInMoneyDTO.setAccountName(payerName);
-		outInMoneyDTO.setAmount(payerAmt);
-		outInMoneyDTO.setBankFlg(bankFLG);
-		outInMoneyDTO.setDirectStatus(DirectStateEnum.INITIAL.val);
-		outInMoneyDTO.setMainOrderNo(mainOrderNo);
-		outInMoneyDTO.setOrderNo(orderNo);
-		outInMoneyDTO.setOrderSerialNumber(reqDTO.getSerialNumber());
-		outInMoneyDTO.setPayChannel(reqDTO.getPayChannel());
-		outInMoneyDTO.setPayTime(new Date());
-		outInMoneyDTO.setReceiveBankAddr(payerBankAddress);
-		outInMoneyDTO.setReceiveBankName(payerBank);
-		outInMoneyDTO.setReceiveUserid(appPayerId);
-		outInMoneyDTO.setReceiveUserType(CmbPayShopEnum.CMB_PAY_SHOP_BUYER.val);
-		outInMoneyDTO.setSerialNumber(serialNumber);
-		outInMoneyDTO.setTransAmt(payerAmt);
-		outInMoneyDTO.setType(DirectEventEnum.DIRECT_REFUND.val);
-		outInMoneyDTO.setFee(0.0d);
-		outInMoneyDTO.setFeeRule("");
-		int i = outInMoneyWriteDAO.addOneOutInMoney(outInMoneyDTO);
-		if (i == 0) {
-			logger.info("制付款单入库异常");
-			return BaseResult.fail(OrderResultCode.DB_0014);
+		if(null == param.getDouble("amt")){
+			 logger.info("丢失关键字{金额}");
+			 errCode = payerFlag ? OrderResultCode.PARAM_0019 : OrderResultCode.PARAM_0033 ;
+			 return BaseResult.fail(errCode);
 		}
-		// 组付款参数
-		DirectCash cashDTO = new DirectCash();
-		cashDTO.setOrderId(orderId);
-		cashDTO.setAccno(payerAccount);
-		cashDTO.setAccountName(payerName);
-		cashDTO.setAmt(payerAmt);
-		cashDTO.setBankFlg(bankFLG);
-		cashDTO.setDirectStatus(DirectStateEnum.INITIAL.val);
-		cashDTO.setMainOrderNo(mainOrderNo);
-		cashDTO.setReceiveBankAddr(payerBankAddress);
-		cashDTO.setReceiveBankName(payerBank);
-		cashDTO.setSerialNumber(serialNumber);
-		cashDTO.setTriggerTime(new Date());
-		cashDTO.setType(DirectEventEnum.DIRECT_REFUND.val);
-		cashDTO.setNeedAmt(payerAmt);
-		cashDTO.setHandCharge(0.0D);
-		return BaseResult.success(cashDTO);
+		if(StringUtils.isBlank(param.getString("mainOrderNo"))){
+			logger.info("丢失关键字{结算订单号}");
+            return BaseResult.fail(OrderResultCode.PARAM_0035);
+		}
+		if (StringUtils.isBlank(param.getString("orderNo"))) {
+            logger.info("丢失关键字{订单编号}");
+            return BaseResult.fail(OrderResultCode.PARAM_0006);
+		}
+		if(null == param.getLong("userId")){
+			 logger.info("丢失关键字{收款人账户ID}");
+			 errCode = payerFlag ? OrderResultCode.PARAM_0007 : OrderResultCode.PARAM_0010;
+             return BaseResult.fail(errCode);
+		}
+		if(receiptCard == null){
+			 logger.info("丢失关键字{收款卡信息(true-买家,false-卖家)}:"+payerFlag);
+             return BaseResult.fail(OrderResultCode.PARAM_0031);
+		}
+		//收款卡账号
+		if(StringUtils.isBlank(receiptCard.getReceiptAccount())){
+			 logger.info("丢失关键字{卖家收款卡账号(true-买家,false-卖家)}:"+payerFlag);
+             return BaseResult.fail(OrderResultCode.PARAM_0011);
+		}
+		//收款人名称
+		if(StringUtils.isBlank(receiptCard.getReceiptName())){
+			 logger.info("丢失关键字{卖家收款卡人姓名(true-买家,false-卖家)}:"+payerFlag);
+             return BaseResult.fail(OrderResultCode.PARAM_0012);
+		}
+		//招商卡标志
+		if(StringUtils.isBlank(receiptCard.getBankFLG())){
+			logger.info("丢失关键字{招商银行标志(true-买家,false-卖家)}:"+payerFlag);
+            return BaseResult.fail(OrderResultCode.PARAM_0013);
+		}
+		//收款卡地址
+		if(StringUtils.isBlank(receiptCard.getReceiptBankAddress())){
+			 logger.info("丢失关键字{卖家收款行开户地址(true-买家,false-卖家)}:"+payerFlag);
+             return BaseResult.fail(OrderResultCode.PARAM_0014);
+		}
+		//收款卡银行
+		if(StringUtils.isBlank(receiptCard.getReceiptBank())){
+			 logger.info("丢失关键字{卖家收款行银行}(true-买家,false-卖家)}:"+payerFlag);
+             return BaseResult.fail(OrderResultCode.PARAM_0015);
+		}
+		return BaseResult.success();
 	}
 	
 	/**
-	 * 退款-保存卖家出金记录
-	 * 
-	 * @param orderId
-	 * @param mainOrderNo
-	 * @param payeeAmt
+	 * 保存付款单信息
+	 * @param orderMap
 	 * @param receiptCard
 	 * @return
+	 * @throws Exception
 	 */
-	private BaseResult<DirectCash> savePayeeDirect(Long orderId,HnpRefund reqDTO) throws Exception {
-		ReceiptCard receiptCard = reqDTO.getPayeeReceiptCard();
-		Double payeeAmt = reqDTO.getPayeeAmt();
-		if (null == payeeAmt) {
-			logger.info("丢失关键字{卖家金额}");
-			return BaseResult.fail(OrderResultCode.PARAM_0033);
-		}
-		if (null == receiptCard) {
-			logger.info("丢失关键字{卖家收款卡信息}");
-			return BaseResult.fail(OrderResultCode.PARAM_0031);
-		}
-		String payeeAccount = receiptCard.getReceiptAccount();
-		if (StringUtils.isBlank(payeeAccount)) {
-			logger.info("丢失关键字{卖家收款卡账号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0011);
-		}
-		String payeeName = receiptCard.getReceiptName();
-		if (StringUtils.isBlank(payeeName)) {
-			logger.info("丢失关键字{卖家收款卡人姓名}");
-			return BaseResult.fail(OrderResultCode.PARAM_0012);
-		}
-		String bankFLG = receiptCard.getBankFLG();
-		if (StringUtils.isBlank(bankFLG)) {
-			logger.info("丢失关键字{招商银行标志}");
-			return BaseResult.fail(OrderResultCode.PARAM_0013);
-		}
-		String payeeBankAddress = receiptCard.getReceiptBankAddress();
-		if (StringUtils.isBlank(payeeBankAddress)) {
-			logger.info("丢失关键字{卖家收款行开户地址}");
-			return BaseResult.fail(OrderResultCode.PARAM_0014);
-		}
-		String payeeBank = receiptCard.getReceiptBank();
-		if (StringUtils.isBlank(payeeBankAddress)) {
-			logger.info("丢失关键字{卖家收款行银行}");
-			return BaseResult.fail(OrderResultCode.PARAM_0015);
-		}
-
-		String mainOrderNo = reqDTO.getMainOrderNo();
-		if (StringUtils.isBlank(mainOrderNo)) {
-			logger.info("丢失关键字{结算订单号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0006);
-		}
-		Long appPayeeId = reqDTO.getAppPayeeId();
-		if (null == appPayeeId) {
-			logger.info("丢失关键字{卖家ID}");
-			return BaseResult.fail(OrderResultCode.PARAM_0010);
-		}
-		String orderNo = reqDTO.getOrderNo();
-		if (StringUtils.isBlank(orderNo)) {
-			logger.info("丢失关键字{订单编号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0006);
-		}
-		String paymentNo = reqDTO.getPaymentNo();
-		if (StringUtils.isBlank(paymentNo)) {
-			logger.info("丢失关键字{支付单号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0006);
-		}
-		String orderSerialNumber = reqDTO.getSerialNumber();
-		// 2校验子订单流水在付款记录表中的状态
-		OutInMoneyEntity outMoneyDTO = outInMoneyReadDAO.getByOrderSerialNumber(orderSerialNumber,CmbPayShopEnum.CMB_PAY_SHOP_SELLER.val);
-		if (null != outMoneyDTO) {
-			if (outMoneyDTO.isPayFail()) {
-				logger.info("订单号：" + orderNo + "付款失败,msg："+ outMoneyDTO.getResMessage());
+	private BaseResult<OutInMoney> saveOutMoney(Map<String,Object> orderMap, ReceiptCard receiptCard) throws Exception { 
+		ParamHandler param = new ParamHandler(orderMap);
+		//订单金额 
+		Double amt = param.getDouble("amt") ;
+		//付款金额
+		Double transAmt = param.getDouble("transAmt") ;
+		//主订单号
+		String mainOrderNo = param.getString("mainOrderNo");
+		//子订单号
+		String orderNo = param.getString("orderNo");
+		//子订单流水号
+		String orderSerialNumber = param.getString("orderSerialNumber");
+		//支付渠道
+		String payChannel = param.getString("payChannel");
+		//收款人账户ID
+		Long userId = param.getLong("userId");
+		//收款人类型 买家还是卖家  CmbPayShopEnum.CMB_PAY_SHOP_SELLER.val
+		String userType = param.getString("userType");
+		//付款方式 付款给卖家 还是 退款  DirectEventEnum.DIRECT_REFUND.val
+		String type = DirectEventEnum.DIRECT_REFUND.val;
+		//付款流水号
+		String refundSerialNumber = serialGenZkImpl.genRefundSerialNo();
+		//查询付款单信息
+		OutInMoneyEntity outMoneyEntity = outInMoneyReadDAO.getByOrderSerialNumber(orderSerialNumber,userType);
+		if (null != outMoneyEntity) {
+			if (outMoneyEntity.isPayFail()) {
+				logger.info("订单号：" + orderNo + "付款失败,msg："+ outMoneyEntity.getResMessage());
 				logger.info("付款失败");
 				return BaseResult.fail(OrderResultCode.DB_0010);
 			}
-			if (outMoneyDTO.isPaySuc()) {
+			if (outMoneyEntity.isPaySuc()) {
 				logger.info("订单号：" + orderNo + "付款成功,请勿重复提交");
 				logger.info("付款成功，请勿重复提交");
 				return BaseResult.fail(OrderResultCode.DB_0011);
 			}
-			if (outMoneyDTO.isPaying() || outMoneyDTO.isToPay()) {
+			if (outMoneyEntity.isPaying() || outMoneyEntity.isToPay()) {
 				// 处理中-->直接返回付款单信息，进行支付（先同步支付状态）
-				DirectCash cashDTO = new DirectCash();
-				cashDTO.setOrderId(orderId);
-				cashDTO.setAccno(outMoneyDTO.getAccno());
-				cashDTO.setAccountName(outMoneyDTO.getAccountName());
-				cashDTO.setAmt(outMoneyDTO.getAmount());
-				cashDTO.setBankFlg(outMoneyDTO.getBankFlg());
-				cashDTO.setDirectStatus(outMoneyDTO.getDirectStatus());
-				cashDTO.setMainOrderNo(outMoneyDTO.getMainOrderNo());
-				cashDTO.setReceiveBankAddr(outMoneyDTO.getReceiveBankAddr());
-				cashDTO.setReceiveBankName(outMoneyDTO.getReceiveBankAddr());
-				cashDTO.setSerialNumber(outMoneyDTO.getSerialNumber());
-				cashDTO.setTriggerTime(new Date());
-				cashDTO.setType(outMoneyDTO.getType());
-				cashDTO.setNeedAmt(outMoneyDTO.getTransAmt());
-				cashDTO.setHandCharge(outMoneyDTO.getFee());
-				return BaseResult.success(cashDTO);
+				OutInMoney returnbean = new OutInMoney();
+				CopyBeanUtil.getInstance().copyBeanProperties(outMoneyEntity, returnbean);
+				return BaseResult.success(returnbean);
 			}
 		}
-		// 出金主表
-		String serialNumber = SerialGenFactory.getInstance().genRefundSerialNo();
 		// 出金明细表
 		OutInMoneyEntity outInMoneyDTO = new OutInMoneyEntity();
-		outInMoneyDTO.setAccno(payeeAccount);
-		outInMoneyDTO.setAccountName(payeeName);
-		outInMoneyDTO.setAmount(payeeAmt);
-		outInMoneyDTO.setBankFlg(bankFLG);
+		outInMoneyDTO.setAccno(receiptCard.getReceiptAccount());
+		outInMoneyDTO.setAccountName(receiptCard.getReceiptName());
+		outInMoneyDTO.setAmount(amt);
+		outInMoneyDTO.setBankFlg(receiptCard.getBankFLG());
 		outInMoneyDTO.setDirectStatus(DirectStateEnum.INITIAL.val);
 		outInMoneyDTO.setMainOrderNo(mainOrderNo);
 		outInMoneyDTO.setOrderNo(orderNo);
-		outInMoneyDTO.setOrderSerialNumber(reqDTO.getSerialNumber());
-		outInMoneyDTO.setPayChannel(reqDTO.getPayChannel());
+		outInMoneyDTO.setOrderSerialNumber(orderSerialNumber);
+		outInMoneyDTO.setPayChannel(payChannel);
 		outInMoneyDTO.setPayTime(new Date());
-		outInMoneyDTO.setReceiveBankAddr(payeeBankAddress);
-		outInMoneyDTO.setReceiveBankName(payeeBank);
-		outInMoneyDTO.setReceiveUserid(appPayeeId);
-		outInMoneyDTO.setReceiveUserType(CmbPayShopEnum.CMB_PAY_SHOP_SELLER.val);
-		outInMoneyDTO.setSerialNumber(serialNumber);
-		outInMoneyDTO.setTransAmt(payeeAmt);
-		outInMoneyDTO.setType(DirectEventEnum.DIRECT_REFUND.val);
+		outInMoneyDTO.setReceiveBankAddr(receiptCard.getReceiptBankAddress());
+		outInMoneyDTO.setReceiveBankName(receiptCard.getReceiptBank());
+		outInMoneyDTO.setReceiveUserid(userId);
+		outInMoneyDTO.setReceiveUserType(userType); /*CmbPayShopEnum.CMB_PAY_SHOP_SELLER.val*/
+		outInMoneyDTO.setSerialNumber(refundSerialNumber);
+		outInMoneyDTO.setTransAmt(transAmt);
+		outInMoneyDTO.setType(type);/*DirectEventEnum.DIRECT_REFUND.val*/
 		outInMoneyDTO.setFee(0.0d);
 		outInMoneyDTO.setFeeRule("");
 		int i = outInMoneyWriteDAO.addOneOutInMoney(outInMoneyDTO);
-		if (i == 0) {
+		if (i <= 0) {
 			logger.info("制付款单入库异常");
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 		// 组付款制表单
-		DirectCash cashDTO = new DirectCash();
-		cashDTO.setOrderId(orderId);
-		cashDTO.setAccno(payeeAccount);
-		cashDTO.setAccountName(payeeName);
-		cashDTO.setAmt(payeeAmt);
-		cashDTO.setBankFlg(bankFLG);
-		cashDTO.setDirectStatus(DirectStateEnum.INITIAL.val);
-		cashDTO.setMainOrderNo(mainOrderNo);
-		cashDTO.setReceiveBankAddr(payeeBankAddress);
-		cashDTO.setReceiveBankName(payeeBank);
-		cashDTO.setSerialNumber(serialNumber);
-		cashDTO.setTriggerTime(new Date());
-		cashDTO.setType(DirectEventEnum.DIRECT_REFUND.val);
-		cashDTO.setNeedAmt(payeeAmt);
-		cashDTO.setHandCharge(0.0D);
-		return BaseResult.success(cashDTO);
+		OutInMoney outInMoney = new OutInMoney();
+		CopyBeanUtil.getInstance().copyBeanProperties(outInMoneyDTO, outInMoney);
+		return BaseResult.success(outInMoney);
 	}
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO">
 	<!-- 添加结算付款单 -->
-	<insert id="addOneOutInMoney" parameterType="com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity">
+	<insert id="addOneOutInMoney" useGeneratedKeys="true" keyProperty="id" parameterType="com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity">
 		INSERT INTO  hnp_out_money (main_order_no,order_no,order_serial_number,amount,
                             fee,fee_rule,trans_amt,receive_userid,receive_user_type,
                             accno,account_name,receive_bank_addr,receive_bank_name,

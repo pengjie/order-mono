@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.huinong.truffle.component.base.component.version.anno.ApiVersion;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
-import com.huinong.truffle.payment.order.mono.domain.DirectCash;
 import com.huinong.truffle.payment.order.mono.domain.HnpRefund;
 import com.huinong.truffle.payment.order.mono.domain.HnpSetlDetail;
 import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
@@ -68,10 +67,10 @@ public class SetlController extends BaseController{
     	@ApiImplicitParam(name = "type", value = "结算方向(0-付款 1-退款)", required = true, paramType="query", dataType = "String"),
     	@ApiImplicitParam(name = "payChannel", value = "支付渠道(0-网银 2-快捷 6-支付宝 7-微信)", required = true, paramType="query", dataType = "String")
     })
-    @RequestMapping(value = "/receipt", method= RequestMethod.POST)
-    public BaseResult<DirectCash> confirmReceipt(HnpSetlDetail reqDTO){
+    @RequestMapping(value = "/receipt", method= RequestMethod.POST) 
+    public BaseResult<OutInMoney> confirmReceipt(HnpSetlDetail reqDTO){
         logger.info("[订单服务][确认收货]请求参数:"+gson.toJson(reqDTO));
-        BaseResult<DirectCash> resultDTO = new BaseResult<DirectCash>();
+        BaseResult<OutInMoney> resultDTO = new BaseResult<OutInMoney>();
 		try {
 			resultDTO = confirmService.confirmReceipt(reqDTO);
 			logger.info("[订单服务][确认收货]返回参数:"+gson.toJson(resultDTO));
@@ -94,9 +93,9 @@ public class SetlController extends BaseController{
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "reqDTO", value = "订单退款对象", required = true, paramType="body", dataType = "HnpRefund")
     })
-    public BaseResult<List<DirectCash>> confirmRefund(HnpRefund reqDTO){
+    public BaseResult<List<OutInMoney>> confirmRefund(HnpRefund reqDTO){
         logger.info("[订单服务][确认退款]请求参数:"+gson.toJson(reqDTO));
-        BaseResult<List<DirectCash>> resultDTO;
+        BaseResult<List<OutInMoney>> resultDTO;
 		try {
 			resultDTO = refundService.confirmRefund(reqDTO);
 			logger.info("[订单服务][确认退款]返回参数:"+gson.toJson(resultDTO));

@@ -98,9 +98,4 @@ public class SerialGenZkImpl implements SerialGen {
 	public String genOrderNo(Date dt) {
     	return DateUtils.formatDateyyyymmdd(dt);
 	}
-	
-	 public static void main(String[] args) {
-        System.out.println(SerialGenFactory.getInstance().genBillSerialNo());
-    }
-
 }

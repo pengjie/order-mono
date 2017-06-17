@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.huinong.truffle.component.base.component.version.anno.ApiVersion;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
+import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.domain.HnpMainOrder;
 import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
 import com.huinong.truffle.payment.order.mono.service.OrderService;
@@ -37,19 +38,6 @@ public class OrderController extends BaseController{
     @Autowired 
     private OrderService orderService ;
     
-    
-    
-    /**
-     * 测试
-    @RequestMapping(value = { "/test" }, method = {RequestMethod.POST, RequestMethod.GET })
-    public BaseResult<String> test(HttpServletRequest request){
-        logger.info("测试日志------------------");
-        BaseResult<String>  resultDTO = new BaseResult<String>();
-        resultDTO.setData("operater sucess");
-        return resultDTO ;
-    }*/
-
-    
 	/**
 	 * 预支付(产生支付流水信息) 
 	 * @param request
@@ -63,9 +51,15 @@ public class OrderController extends BaseController{
     })
     public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
 	    logger.info("[订单服务][预支付]请求参数:"+gson.toJson(mainOrder));
-	    BaseResult<HnpMainOrder> resultDTO = orderService.createOrder(mainOrder);
-	    logger.info("[订单服务][预支付]返回参数:"+gson.toJson(resultDTO));
-	    return resultDTO;
+	    BaseResult<HnpMainOrder> resultDTO = new BaseResult<HnpMainOrder>();
+	    try {
+	    	resultDTO = orderService.createOrder(mainOrder);
+	    	logger.info("[订单服务][预支付]返回参数:"+gson.toJson(resultDTO));
+	    	return resultDTO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BaseResult.fail(OrderResultCode.SYS_0001);
+		}
 	}
 	
 	/**
@@ -118,8 +112,14 @@ public class OrderController extends BaseController{
     public BaseResult<HnpMainOrder> finish(String mainOrderNo){
         logger.info("[订单服务][完结订单]请求参数:mainOrderNo="+mainOrderNo);
         Integer orderState = OrderStateEnum.ORDER_2.val ;
-        BaseResult<HnpMainOrder> resultDTO = orderService.finishOrder(mainOrderNo,orderState);
-        logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(resultDTO));
-        return resultDTO;
+        BaseResult<HnpMainOrder> resultDTO = new BaseResult<HnpMainOrder>();
+		try {
+			resultDTO = orderService.finishOrder(mainOrderNo,orderState);
+			logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(resultDTO));
+			return resultDTO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BaseResult.fail(OrderResultCode.SYS_0001);
+		}
     }
 }

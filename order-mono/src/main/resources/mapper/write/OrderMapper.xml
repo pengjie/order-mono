@@ -222,7 +222,7 @@
         serial_number = #{serialNumber,jdbcType=VARCHAR},
       </if>
     </set>
-    where group_order_no = #{groupOrderNo,jdbcType=VARCHAR},
+    where group_order_no = #{groupOrderNo,jdbcType=VARCHAR}
   </update>
   
  

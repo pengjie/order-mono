@@ -33,6 +33,9 @@ public class HnpMainOrderEntity implements Serializable {
     private Date createTime;
     //修改时间
     private Date modifyTime;
+    //请求入参关键信息UUID
+    private String msgUUID ;
+    
 	public Long getId() {
 		return id;
 	}
@@ -88,6 +91,12 @@ public class HnpMainOrderEntity implements Serializable {
 		this.modifyTime = modifyTime;
 	}
 	
+	public String getMsgUUID() {
+		return msgUUID;
+	}
+	public void setMsgUUID(String msgUUID) {
+		this.msgUUID = msgUUID;
+	}
 	/**
      * 订单状态是否为待支付状态
      * @return

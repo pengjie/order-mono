@@ -31,6 +31,7 @@ public enum OrderResultCode implements ResultCodeIntf {
 	DB_0020(4020,"订单预支付超时"),
 	DB_0021(4021,"对象转换异常"),
 	DB_0022(4022,"完结订单异常"),
+	DB_0023(4023,"检索的订单结果为空"),
     
     //入参参数异常 5
 	PARAM_0002(5002,"订单项参数为空"),
@@ -63,6 +64,8 @@ public enum OrderResultCode implements ResultCodeIntf {
 	PARAM_0031(5031,"无法识别{收款卡信息}"),
 	PARAM_0032(5032,"无法识别{支付流水号}"),
 	PARAM_0033(5033,"无法识别{卖家金额}"),
+	PARAM_0034(5034,"无法识别{买卖家类型}"),
+	PARAM_0035(5035,"无法识别{主订单号}"),
 	//买家收款卡信息
 	;
 

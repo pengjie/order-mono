@@ -204,7 +204,7 @@ public class HnpRefund implements Serializable {
         StringBuilder buffer = new StringBuilder();
         buffer.append(appId == null ? "appId":appId);
         buffer.append(null == appPayerId ? "appPayerId":appPayerId);
-        buffer.append(null == appPayerId ? "appPayerId":appPayerId);
+        buffer.append(null == appPayeeId ? "appPayeeId":appPayeeId);
         buffer.append(payerAmt+payeeAmt);
         buffer.append(StringUtils.isBlank(mainOrderNo) ? "mainOrderNo":mainOrderNo);
         buffer.append(StringUtils.isBlank(orderNo) ? "orderNo":orderNo);

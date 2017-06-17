@@ -21,6 +21,7 @@ public class OrderConstants {
     public static enum RedisKey{
         ORDER_REPAY_PARAM_KEY("ORDER_REPAY_PARAM_KEY_"),
         ORDER_REPAY_KEY("ORDER_REPAY_KEY_"),
+        ORDER_FINISH_KEY("ORDER_FINISH_KEY_"),
         ORDER_SETL_KEY("ORDER_SETL_KEY_"),
         ORDER_REFUND_KEY("ORDER_REFUND_KEY_");
         public String value;

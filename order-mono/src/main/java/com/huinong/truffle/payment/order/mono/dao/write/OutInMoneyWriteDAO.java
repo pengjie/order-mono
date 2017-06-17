@@ -2,7 +2,7 @@ package com.huinong.truffle.payment.order.mono.dao.write;
 
 import java.util.Map;
 
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
@@ -14,10 +14,6 @@ import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
  */
 @Repository
 public interface OutInMoneyWriteDAO {
-	
-	/*public static void main(String[] args) {
-		org.apache.ibatis.type.JdbcType.VARCHAR.name() ;
-	}*/
 	
 	/**
 	 * 添加结算制表单
