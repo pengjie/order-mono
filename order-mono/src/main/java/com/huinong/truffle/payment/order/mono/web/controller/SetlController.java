@@ -53,7 +53,6 @@ public class SetlController extends BaseController{
      */
     @ApiVersion(1)
     @ApiOperation(value="确认收货", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回结算订单信息")
-    @RequestMapping(value = "/receipt", method= RequestMethod.POST)
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String"),
     	@ApiImplicitParam(name = "appPayerId", value = "买家ID", required = true, paramType="query", dataType = "Long"),
@@ -69,6 +68,7 @@ public class SetlController extends BaseController{
     	@ApiImplicitParam(name = "type", value = "结算方向(0-付款 1-退款)", required = true, paramType="query", dataType = "String"),
     	@ApiImplicitParam(name = "payChannel", value = "支付渠道(0-网银 2-快捷 6-支付宝 7-微信)", required = true, paramType="query", dataType = "String")
     })
+    @RequestMapping(value = "/receipt", method= RequestMethod.POST)
     public BaseResult<DirectCash> confirmReceipt(HnpSetlDetail reqDTO){
         logger.info("[订单服务][确认收货]请求参数:"+gson.toJson(reqDTO));
         BaseResult<DirectCash> resultDTO = new BaseResult<DirectCash>();

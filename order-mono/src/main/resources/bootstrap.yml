@@ -3,10 +3,10 @@ server:
   port: 16112
 spring:
   application:
-    name: order-mono
+    name: payment-order-mono
   cloud:
     config:
-      name: order-mono #定位Git中的资源
+      name: payment-order-mono #定位Git中的资源
       profile: ${config.profile:dev} #默认指定pro结尾的文件如: message-center-pro.yml
       label: master #对应git分支
       discovery:
@@ -15,13 +15,15 @@ spring:
         
   profiles:
     active: dev
-     
 eureka:
   instance:
     prefer-ip-address: true
     lease-expiration-duration-in-seconds: 30 
     lease-renewal-interval-in-seconds: 10
-  
+    host1: per1
+    host2: per2
   client:
+    # healthcheck:
+    # enabled: true
     serviceUrl:
-      defaultZone: http://10.10.11.172:1111/eureka/
+      defaultZone: http://${eureka.instance.host1}:1111/eureka/,http://${eureka.instance.host2}:1111/eureka/
