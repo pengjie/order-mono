@@ -31,7 +31,7 @@ import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
 import com.huinong.truffle.payment.order.mono.domain.HnpRefund;
-import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
+import com.huinong.truffle.payment.order.mono.domain.HnpOutInMoney;
 import com.huinong.truffle.payment.order.mono.domain.ReceiptCard;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
@@ -66,7 +66,7 @@ public class RefundService {
 	@Autowired
 	private DefRedisClient defRedisClient;
 	
-	public BaseResult<List<OutInMoney>> confirmRefund(HnpRefund reqDTO) throws Exception {
+	public BaseResult<List<HnpOutInMoney>> confirmRefund(HnpRefund reqDTO) throws Exception {
 		String mainOrderNo = reqDTO.getMainOrderNo();
 		if (StringUtils.isBlank(mainOrderNo)) {
 			return BaseResult.fail(OrderResultCode.PARAM_0006);
@@ -112,7 +112,7 @@ public class RefundService {
 			}
 
 			// 退款给买家
-			List<OutInMoney> directCashlist = new ArrayList<OutInMoney>();
+			List<HnpOutInMoney> directCashlist = new ArrayList<HnpOutInMoney>();
 			//组买家信息
 			Map<String,Object> payerMap = new HashMap<String,Object>();
 			payerMap.put("amt",reqDTO.getPayerAmt());
@@ -126,11 +126,11 @@ public class RefundService {
 			//验证买家信息
 			BaseResult<Void> payerCheckResult = checkReqMsg(payerMap, reqDTO.getPayerReceiptCard());
 			if(null == payerCheckResult || payerCheckResult.getCode()  != ResultCode.SUCCESS.getCode()){
-				return new BaseResult<List<OutInMoney>>(payerCheckResult.getCode(),payerCheckResult.getMsg());
+				return new BaseResult<List<HnpOutInMoney>>(payerCheckResult.getCode(),payerCheckResult.getMsg());
 			}
-			BaseResult<OutInMoney> payerResult = saveOutMoney(payerMap, reqDTO.getPayerReceiptCard());
+			BaseResult<HnpOutInMoney> payerResult = saveOutMoney(payerMap, reqDTO.getPayerReceiptCard());
 			if (null == payerResult || payerResult.getData() == null || payerResult.getCode() != ResultCode.SUCCESS.getCode()) {
-				return new BaseResult<List<OutInMoney>>(payerResult.getCode(),payerResult.getMsg());
+				return new BaseResult<List<HnpOutInMoney>>(payerResult.getCode(),payerResult.getMsg());
 			}
 			directCashlist.add(payerResult.getData());
 			
@@ -149,11 +149,11 @@ public class RefundService {
 				//验证买家信息
 				BaseResult<Void> payeeCheckResult = checkReqMsg(payerMap, reqDTO.getPayerReceiptCard());
 				if(null == payeeCheckResult || payeeCheckResult.getCode()  != ResultCode.SUCCESS.getCode()){
-					return new BaseResult<List<OutInMoney>>(payeeCheckResult.getCode(),payeeCheckResult.getMsg());
+					return new BaseResult<List<HnpOutInMoney>>(payeeCheckResult.getCode(),payeeCheckResult.getMsg());
 				}
-				BaseResult<OutInMoney> payeeResult = saveOutMoney(payeeMap, reqDTO.getPayeeReceiptCard());
+				BaseResult<HnpOutInMoney> payeeResult = saveOutMoney(payeeMap, reqDTO.getPayeeReceiptCard());
 				if (null == payeeResult || payeeResult.getData() == null || payeeResult.getCode() != ResultCode.SUCCESS.getCode()) {
-					return new BaseResult<List<OutInMoney>>(payeeResult.getCode(),payeeResult.getMsg());
+					return new BaseResult<List<HnpOutInMoney>>(payeeResult.getCode(),payeeResult.getMsg());
 				}
 				directCashlist.add(payeeResult.getData());
 			}
@@ -243,7 +243,7 @@ public class RefundService {
 	 * @return
 	 * @throws Exception
 	 */
-	private BaseResult<OutInMoney> saveOutMoney(Map<String,Object> orderMap, ReceiptCard receiptCard) throws Exception { 
+	private BaseResult<HnpOutInMoney> saveOutMoney(Map<String,Object> orderMap, ReceiptCard receiptCard) throws Exception { 
 		ParamHandler param = new ParamHandler(orderMap);
 		//订单金额 
 		Double amt = param.getDouble("amt") ;
@@ -280,7 +280,7 @@ public class RefundService {
 			}
 			if (outMoneyEntity.isPaying() || outMoneyEntity.isToPay()) {
 				// 处理中-->直接返回付款单信息，进行支付（先同步支付状态）
-				OutInMoney returnbean = new OutInMoney();
+				HnpOutInMoney returnbean = new HnpOutInMoney();
 				CopyBeanUtil.getInstance().copyBeanProperties(outMoneyEntity, returnbean);
 				return BaseResult.success(returnbean);
 			}
@@ -312,7 +312,7 @@ public class RefundService {
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 		// 组付款制表单
-		OutInMoney outInMoney = new OutInMoney();
+		HnpOutInMoney outInMoney = new HnpOutInMoney();
 		CopyBeanUtil.getInstance().copyBeanProperties(outInMoneyDTO, outInMoney);
 		return BaseResult.success(outInMoney);
 	}

@@ -20,7 +20,7 @@ import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.payment.order.mono.domain.HnpRefund;
 import com.huinong.truffle.payment.order.mono.domain.HnpSetlDetail;
-import com.huinong.truffle.payment.order.mono.domain.OutInMoney;
+import com.huinong.truffle.payment.order.mono.domain.HnpOutInMoney;
 import com.huinong.truffle.payment.order.mono.service.ConfirmService;
 import com.huinong.truffle.payment.order.mono.service.RefundService;
 import com.huinong.truffle.payment.order.mono.service.SetlService;
@@ -68,9 +68,9 @@ public class SetlController extends BaseController{
     	@ApiImplicitParam(name = "type", value = "结算方向(0-付款 1-退款)", required = true, paramType="query", dataType = "String"),
     	@ApiImplicitParam(name = "payChannel", value = "支付渠道(0-网银 2-快捷 6-支付宝 7-微信)", required = true, paramType="query", dataType = "String")
     })
-    public BaseResult<OutInMoney> confirmReceipt(HnpSetlDetail reqDTO){
+    public BaseResult<HnpOutInMoney> confirmReceipt(HnpSetlDetail reqDTO){
         logger.info("[订单服务][确认收货]请求参数:"+gson.toJson(reqDTO));
-        BaseResult<OutInMoney> resultDTO = new BaseResult<OutInMoney>();
+        BaseResult<HnpOutInMoney> resultDTO = new BaseResult<HnpOutInMoney>();
 		try {
 			resultDTO = confirmService.confirmReceipt(reqDTO);
 			logger.info("[订单服务][确认收货]返回参数:"+gson.toJson(resultDTO));
@@ -93,9 +93,9 @@ public class SetlController extends BaseController{
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "reqDTO", value = "订单退款对象", required = true, paramType="body", dataType = "HnpRefund")
     })
-    public BaseResult<List<OutInMoney>> confirmRefund(HnpRefund reqDTO){
+    public BaseResult<List<HnpOutInMoney>> confirmRefund(HnpRefund reqDTO){
         logger.info("[订单服务][确认退款]请求参数:"+gson.toJson(reqDTO));
-        BaseResult<List<OutInMoney>> resultDTO;
+        BaseResult<List<HnpOutInMoney>> resultDTO;
 		try {
 			resultDTO = refundService.confirmRefund(reqDTO);
 			logger.info("[订单服务][确认退款]返回参数:"+gson.toJson(resultDTO));
@@ -123,7 +123,7 @@ public class SetlController extends BaseController{
     	@ApiImplicitParam(name = "resCode", value = "付款码", required = false, paramType="query", dataType = "String"),
     	@ApiImplicitParam(name = "resMessage", value = "付款返回消息", required = false, paramType="query", dataType = "String")
     })
-    public BaseResult<Boolean> statechange(OutInMoney reqDTO){
+    public BaseResult<Boolean> statechange(HnpOutInMoney reqDTO){
         logger.info("[订单服务][付款状态变更]请求参数:"+gson.toJson(reqDTO));
         BaseResult<Boolean> resultDTO = new BaseResult<Boolean>();
 		try {
@@ -145,9 +145,9 @@ public class SetlController extends BaseController{
     @ApiVersion(1)
     @ApiOperation(value="查询付款中订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单列表")
     @RequestMapping(value = "/listprocess", method= RequestMethod.POST)
-    public BaseResult<List<OutInMoney>> listProcess(){
+    public BaseResult<List<HnpOutInMoney>> listProcess(){
         logger.info("[订单服务][付款中订单列表]请求开始");
-        BaseResult<List<OutInMoney>> resultDTO = new BaseResult<List<OutInMoney>>();
+        BaseResult<List<HnpOutInMoney>> resultDTO = new BaseResult<List<HnpOutInMoney>>();
 		try {
 			resultDTO = setlService.listProcess();
 			logger.info("[订单服务][付款中订单列表]返回参数:"+gson.toJson(resultDTO));

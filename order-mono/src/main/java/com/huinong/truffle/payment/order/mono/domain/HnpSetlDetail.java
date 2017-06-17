@@ -2,10 +2,7 @@ package com.huinong.truffle.payment.order.mono.domain;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
-import com.huinong.truffle.payment.order.mono.util.MD5Util;
 
 /**
  * 结算确认订单明细
@@ -21,7 +18,7 @@ public class HnpSetlDetail implements Serializable {
     //订单流水号
     private String serialNumber ;
     //买家ID
-    private Long appPayerId;
+    private String appPayerId;
     //订单金额
     private Double amt ;
     //子订单
@@ -29,7 +26,7 @@ public class HnpSetlDetail implements Serializable {
     //平台标识
     private Integer appId ;
     //卖家ID
-    private Long appPayeeId ;
+    private String appPayeeId ;
     //订单描叙
     private String orderDesc ;
     //买家
@@ -71,15 +68,6 @@ public class HnpSetlDetail implements Serializable {
         this.serialNumber = serialNumber;
     }
 
-
-    public Long getAppPayerId() {
-        return appPayerId;
-    }
-
-    public void setAppPayerId(Long appPayerId) {
-        this.appPayerId = appPayerId;
-    }
-
     public Double getAmt() {
         return amt;
     }
@@ -102,14 +90,6 @@ public class HnpSetlDetail implements Serializable {
 
     public void setAppId(Integer appId) {
         this.appId = appId;
-    }
-
-    public Long getAppPayeeId() {
-        return appPayeeId;
-    }
-
-    public void setAppPayeeId(Long appPayeeId) {
-        this.appPayeeId = appPayeeId;
     }
 
     public String getOrderDesc() {
@@ -247,6 +227,22 @@ public class HnpSetlDetail implements Serializable {
 	public void setTransAmt(Double transAmt) {
 		this.transAmt = transAmt;
 	}
+	
+	public String getAppPayerId() {
+		return appPayerId;
+	}
+
+	public void setAppPayerId(String appPayerId) {
+		this.appPayerId = appPayerId;
+	}
+
+	public String getAppPayeeId() {
+		return appPayeeId;
+	}
+
+	public void setAppPayeeId(String appPayeeId) {
+		this.appPayeeId = appPayeeId;
+	}
 
 	public boolean isTriggerManual(){
         boolean isTrue = false ;
@@ -255,18 +251,5 @@ public class HnpSetlDetail implements Serializable {
         }
         return isTrue ;
     }
-    
-	/**
-     * 获取对象内容的UUID 用于前后两次交互比较
-     */
-    public String getObjectUUID(){
-        StringBuilder buffer = new StringBuilder();
-        buffer.append(appId == null ? "appId":appId);
-        buffer.append(null == appPayerId ? "appPayerId":appPayerId);
-        buffer.append(null == appPayerId ? "appPayerId":appPayerId);
-        buffer.append(null == amt ? "amt":amt);
-        buffer.append(StringUtils.isBlank(mainOrderNo) ? "mainOrderNo":mainOrderNo);
-        buffer.append(StringUtils.isBlank(orderNo) ? "orderNo":orderNo);
-        return MD5Util.MD5Encode(buffer.toString(), "UTF-8").toUpperCase();
-    }
+	
 }

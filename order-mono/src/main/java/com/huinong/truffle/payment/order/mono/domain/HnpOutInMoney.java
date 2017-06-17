@@ -10,73 +10,52 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
  * @author peng
  *
  */
-public class OutInMoney implements Serializable {
+public class HnpOutInMoney implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	//主订单
 	private String mainOrderNo ;
-	
 	//子订单
 	private String orderNo ;
-	
 	//子订单流水号
 	private String orderSerialNumber ;
-	
 	//子订单ID
 	private Long orderId ;
-	
 	//子订单金额
 	private Double amount ;
-	
 	//手续费
 	private Double fee ;
-	
 	//手续费规则
 	private String feeRule ;
-	
 	//需支付金额
 	private Double transAmt ;
-	
 	//收款方用户ID
 	private Long receiveUserid ;
-	
 	//收款方用户类型：1-买家 2-卖家
 	private String receiveUserType ;
-	
 	//收款方账号
 	private String accno ;
-	
 	//收款方账户名称
 	private String accountName ;
-	
 	//收款方地址
 	private String receiveBankAddr ;
-	
 	//收款方银行名称
 	private String receiveBankName ;
-	
 	//付款流水号
 	private String serialNumber ;
-	
 	//来源渠道
 	private String payChannel ;
-	
 	//付款时间
 	private Date payTime ;
-	
 	//付款状态：0:待付款，1:付款成功，2:付款失败,3:处理中
 	private String directStatus ;
-	
 	//是否招商卡：Y:是  N:不是
 	private String bankFlg;
-	
 	//付款方向 0-付款给卖家 1-付款给买家
 	private String type ;
-	
 	//查询库，返回错误信息
 	private String resMessage;
-	
 	private String resCode ;
 
 	public String getMainOrderNo() {

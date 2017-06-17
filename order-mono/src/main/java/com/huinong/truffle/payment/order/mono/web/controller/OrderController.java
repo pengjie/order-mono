@@ -46,9 +46,6 @@ public class OrderController extends BaseController{
     @ApiVersion(1)
     @ApiOperation(value="创建订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
 	@RequestMapping(value = "/create", method = {RequestMethod.POST})
-    @ApiImplicitParams({
-    	@ApiImplicitParam(name = "mainOrder", value = "预支付订单对象", required = true, paramType="body", dataType = "HnpMainOrder")
-    })
     public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
 	    logger.info("[订单服务][预支付]请求参数:"+gson.toJson(mainOrder));
 	    BaseResult<HnpMainOrder> resultDTO = new BaseResult<HnpMainOrder>();
