@@ -23,7 +23,7 @@ import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.OutInMoneyReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OutInMoneyWriteDAO;
-import com.huinong.truffle.payment.order.mono.domain.HnpOutInMoney;
+import com.huinong.truffle.payment.order.mono.domain.HnpOutMoney;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.OutInMoneyEntity;
 import com.huinong.truffle.payment.order.mono.util.CopyBeanUtil;
@@ -50,17 +50,17 @@ public class SetlService {
 	private OrderWriteDAO orderWriteDAO ;
 
 
-	public BaseResult<List<HnpOutInMoney>> listProcess() throws Exception {
+	public BaseResult<List<HnpOutMoney>> listProcess() throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("directStatus", DirectStateEnum.PROCESSING.val);
 		List<OutInMoneyEntity> list = outInMoneyReadDAO.listOutInMoney(param);
 		if(null == list || list.size() == 0){
-			return BaseResult.success(new ArrayList<HnpOutInMoney>());
+			return BaseResult.success(new ArrayList<HnpOutMoney>());
 		}else{
-			List<HnpOutInMoney> returnList = new ArrayList<HnpOutInMoney>();
-			HnpOutInMoney dto = null ;
+			List<HnpOutMoney> returnList = new ArrayList<HnpOutMoney>();
+			HnpOutMoney dto = null ;
 			for(OutInMoneyEntity entity : list){
-				dto = new HnpOutInMoney();
+				dto = new HnpOutMoney();
 				CopyBeanUtil.getInstance().copyBeanProperties(entity, dto);
 				returnList.add(dto);
 			}
@@ -69,7 +69,7 @@ public class SetlService {
 	}
 
 	@Transactional
-	public BaseResult<Boolean> stateChange(HnpOutInMoney reqDTO) throws Exception {
+	public BaseResult<Boolean> stateChange(HnpOutMoney reqDTO) throws Exception {
 		String type = reqDTO.getType();
 		if (StringUtils.isBlank(type)) {
 			logger.info("无法识别关键字{付款方向}");
