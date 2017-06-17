@@ -371,4 +371,30 @@ public class OrderService {
 			}
 		}
 	}
+	
+	/**
+	 * 根据子订单流水号查询订单信息
+	 * @param orderSerialNumber
+	 * @return
+	 */
+	public BaseResult<HnpOrder> queryBySerialNumber(String orderSerialNumber) {
+		// 0 校验参数
+		if (StringUtils.isBlank(orderSerialNumber)) {
+			logger.info("查询订单参数{子订单流水号}为空");
+			return BaseResult.fail(OrderResultCode.PARAM_0004);
+		}
+		try {
+			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(orderSerialNumber);
+			if (null == orderEntity) {
+				logger.info("检索订单结果为空");
+				return BaseResult.fail(OrderResultCode.DB_0005);
+			}
+			HnpOrder returnbean = new HnpOrder();
+			CopyBeanUtil.getInstance().copyBeanProperties(orderEntity,returnbean);
+			return BaseResult.success(returnbean);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BaseResult.fail(OrderResultCode.DB_0021);
+		}
+	}
 }
