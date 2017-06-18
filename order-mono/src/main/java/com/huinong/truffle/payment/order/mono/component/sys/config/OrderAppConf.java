@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class OrderAppConf implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	//银行卡手续费
+	/*//银行卡手续费
     @Value("${handcharge.cardpay}")
     private String bankCardFee;
     
@@ -30,7 +30,7 @@ public class OrderAppConf implements Serializable {
     
     //快捷支付手续费
     @Value("${handcharge.quickpay}")
-    private String quickfee ;
+    private String quickfee ;*/
     
     //zk 
     @Value("${zk.zkQuorurm}")
@@ -40,7 +40,7 @@ public class OrderAppConf implements Serializable {
     private String serialGenZnode ;
     
 
-    public String getBankCardFee() {
+  /*  public String getBankCardFee() {
         return bankCardFee;
     }
 
@@ -70,7 +70,7 @@ public class OrderAppConf implements Serializable {
 
     public void setQuickfee(String quickfee) {
         this.quickfee = quickfee;
-    }
+    }*/
 
 	public String getZkQuorurm() {
 		return zkQuorurm;
@@ -88,11 +88,11 @@ public class OrderAppConf implements Serializable {
 		this.serialGenZnode = serialGenZnode;
 	}
 
-	@Override
+	/*@Override
 	public String toString() {
 		return "OrderAppConf [bankCardFee=" + bankCardFee + ", wxfee=" + wxfee
 				+ ", alifee=" + alifee + ", quickfee=" + quickfee
 				+ ", zkQuorurm=" + zkQuorurm + ", serialGenZnode="
 				+ serialGenZnode + "]";
-	}
+	}*/
 }

@@ -1,5 +1,6 @@
 package com.huinong.truffle.payment.order.mono.constant;
 
+
 /**
  * 订单常量
  * @author peng
@@ -15,6 +16,13 @@ public class OrderConstants {
         public Integer val ;
         OrderStateEnum(Integer val){
             this.val = val ;
+        }
+        public static boolean isDefinition(Integer value) {
+            for (OrderStateEnum type : OrderStateEnum.values()) {
+                if (type.val.intValue() == value.intValue() )
+                    return true;
+            }
+            return false;
         }
     }
     

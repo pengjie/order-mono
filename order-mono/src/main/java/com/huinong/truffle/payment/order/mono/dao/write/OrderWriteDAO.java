@@ -45,5 +45,14 @@ public interface OrderWriteDAO {
      * @return
      */
     public int updateByMainOrderNoSelective(HnpOrderEntity record);
+    
+    /**
+     * 根据订单流水号更新订单信息
+     * @param record
+     * @return
+     */
+    public int updateBySerialNumberSelective(HnpOrderEntity record);
+    
+    
 
 }

@@ -143,13 +143,17 @@ public class OrderService {
 		record.setOutUid(mainOrder.getOutUid());
 		record.setSourceSys(mainOrder.getSourceSys());
 		record.setTotalAmt(mainOrder.getTotalAmt());
+		record.setOrderState(OrderStateEnum.ORDER_0.val.intValue());
+		record.setMsgUUID(mainOrder.getObjectUUID());
 		int i = mainOrderWriteDAO.insert(record);
 		if(i <= 0){
 			logger.info("添加订单信息失败"); 
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 		addBatchItem(mainOrder.getData(),mainOrder.getSourceSys());
-		return BaseResult.success(mainOrder);
+		HnpMainOrder result = new HnpMainOrder();
+		CopyBeanUtil.getInstance().copyBeanProperties(record, result);
+		return BaseResult.success(result);
 	}
 	
 	/**
@@ -165,9 +169,7 @@ public class OrderService {
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
         for(int i=0 ; i<orderItem.size();i++){
         	HnpOrder order = orderItem.get(i);
-        	
-        	serialNumber = order.getGroupOrderNo() + (++i);
-        	
+        	serialNumber = order.getGroupOrderNo() + String.format("%04d", (++i));
         	orderEntity = new HnpOrderEntity();
         	orderEntity.setAppId(order.getAppId());
         	orderEntity.setAmt(order.getAmt());
@@ -377,14 +379,14 @@ public class OrderService {
 	 * @param orderSerialNumber
 	 * @return
 	 */
-	public BaseResult<HnpOrder> queryBySerialNumber(String orderSerialNumber) {
+	public BaseResult<HnpOrder> queryBySerialNumber(String serialNumber) {
 		// 0 校验参数
-		if (StringUtils.isBlank(orderSerialNumber)) {
+		if (StringUtils.isBlank(serialNumber)) {
 			logger.info("查询订单参数{子订单流水号}为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
 		}
 		try {
-			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(orderSerialNumber);
+			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(serialNumber);
 			if (null == orderEntity) {
 				logger.info("检索订单结果为空");
 				return BaseResult.fail(OrderResultCode.DB_0005);
@@ -397,4 +399,38 @@ public class OrderService {
 			return BaseResult.fail(OrderResultCode.DB_0021);
 		}
 	}
+	
+	/**
+	 * 根据流水号更新订单状态
+	 * @param serialNumber 订单流水号
+	 * @param state  订单状态
+	 * @return
+	 */
+	public BaseResult<Void> updateHnpDetailBySerialNumber(String serialNumber,Integer state) {
+		if(StringUtils.isBlank(serialNumber)){
+			logger.info("无法识别{订单流水号}");
+			return BaseResult.fail(OrderResultCode.PARAM_0030);
+		}
+		if(null == state){
+			logger.info("无法识别{订单状态}");
+			return BaseResult.fail(OrderResultCode.PARAM_0031);
+		}
+		
+		if(!OrderStateEnum.isDefinition(state)){
+			logger.info("无法识别{订单状态}");
+			return BaseResult.fail(OrderResultCode.PARAM_0032);
+		}
+		
+		HnpOrderEntity record = new HnpOrderEntity();
+		record.setSerialNumber(serialNumber);
+		record.setPayState(String.valueOf(state));
+		record.setPayedTimestamp(new Date());
+		int i = orderWriteDAO.updateBySerialNumberSelective(record);
+		if(i <= 0){
+			logger.info("更新订单状态失败");
+			return BaseResult.fail(OrderResultCode.DB_0024);
+		}
+		return BaseResult.success();
+	}
+	
 }

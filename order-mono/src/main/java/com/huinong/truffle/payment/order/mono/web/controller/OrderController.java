@@ -137,4 +137,19 @@ public class OrderController extends BaseController{
     	logger.info("[订单服务][根据流水号查询子订单信息]返回参数:"+gson.toJson(result));
     	return result;
     }
+    
+    
+    @ApiVersion(1)
+    @ApiOperation(value="平台付款完成-订单详情-更新状态", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回<Void>")
+    @ApiImplicitParams({
+    	@ApiImplicitParam(name = "serialNumber", value = "流水号", required = true, paramType="query", dataType = "String"),
+    	@ApiImplicitParam(name = "state", value = "订单状态（6-付款中 3-交易成功 4-交易关闭）", required = true, paramType="query", dataType = "Integer")
+    })
+    @RequestMapping(value = "/updateStateDetail", method= RequestMethod.POST)
+    public BaseResult<Void> updateHnpDetailBySerialNumber(String serialNumber,Integer state){
+    	logger.info("[订单服务][根据流水号更新子订单状态]请求参数:serialNumber="+serialNumber+",state="+state);
+    	BaseResult<Void> result = orderService.updateHnpDetailBySerialNumber(serialNumber,state);
+    	logger.info("[订单服务][根据流水号更新子订单状态]返回参数:"+gson.toJson(result));
+    	return result;
+    }
 }
