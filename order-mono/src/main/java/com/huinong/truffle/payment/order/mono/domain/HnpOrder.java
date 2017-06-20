@@ -18,25 +18,25 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 public class HnpOrder implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	@ApiModelProperty(value="订单编号",required=false)
+	@ApiModelProperty(value="订单编号",required=true)
 	private String orderId;
-	@ApiModelProperty(value="订单金额",required=false)
+	@ApiModelProperty(value="订单金额",required=true)
 	private BigDecimal amt;
-	@ApiModelProperty(value="主订单号",required=false)
+	@ApiModelProperty(value="主订单号",required=true)
 	private String groupOrderNo;
-	@ApiModelProperty(value="卖家账户ID",required=false)
+	@ApiModelProperty(value="卖家账户ID",required=true)
     private Long inUid;
-	@ApiModelProperty(value="卖家名称",required=false)
+	@ApiModelProperty(value="卖家名称",required=true)
 	private String inUname;
-	@ApiModelProperty(value="买家账户ID",required=false)
+	@ApiModelProperty(value="买家账户ID",required=true)
     private Long outUid;
-	@ApiModelProperty(value="买家名称",required=false)
+	@ApiModelProperty(value="买家名称",required=true)
 	private String shopName;
-	@ApiModelProperty(value="支付金额",required=false)
+	@ApiModelProperty(value="支付金额",required=true)
 	private BigDecimal needPay;
-	@ApiModelProperty(value="订单来源",required=false)
+	@ApiModelProperty(value="订单来源",required=true)
 	private String orderFromSystem;
-	@ApiModelProperty(value="支付描叙",required=false)
+	@ApiModelProperty(value="支付描叙",required=true)
 	private String orderSummary;
     
 	@ApiModelProperty(value="子订单主键ID", hidden=true)

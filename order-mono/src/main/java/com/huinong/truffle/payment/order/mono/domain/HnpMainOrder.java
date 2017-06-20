@@ -26,19 +26,19 @@ private static final long serialVersionUID = 1L;
 	@ApiModelProperty(value="主键ID",hidden=true)
 	private Long id;
 	//主订单编号
-	@ApiModelProperty(value="主订单号",required=false)
+	@ApiModelProperty(value="主订单号",required=true)
     private String mainOrderNo;
     //系统来源
-	@ApiModelProperty(value="系统来源(HNW|HNYX)",required=false)
+	@ApiModelProperty(value="系统来源(HNW|HNYX)",required=true)
     private String sourceSys;
     //订单金额
-	@ApiModelProperty(value="订单金额",required=false)
+	@ApiModelProperty(value="订单金额",required=true)
     private BigDecimal totalAmt;
     //买家账户ID
-	@ApiModelProperty(value="买家账户ID",required=false)
+	@ApiModelProperty(value="买家账户ID",required=true)
     private Long outUid;
     //支付渠道
-	@ApiModelProperty(value="下单渠道(PC|IOS|AD|H5)",required=false)
+	@ApiModelProperty(value="下单渠道(PC|IOS|AD|H5)",required=true)
     private String hnchannel;
     //订单状态
 	@ApiModelProperty(value="主订单状态",hidden=true)
