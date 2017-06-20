@@ -7,7 +7,7 @@ spring:
   cloud:
     config:
       name: payment-order-mono #定位Git中的资源
-      profile: ${config.profile:dev} #默认指定pro结尾的文件如: message-center-pro.yml
+      profile: ${config.profile:pro} #默认指定pro结尾的文件如: message-center-pro.yml
       label: master #对应git分支
       discovery:
         enabled: true #开启通过服务来访问Config Server的功能
@@ -20,8 +20,8 @@ eureka:
     prefer-ip-address: true
     lease-expiration-duration-in-seconds: 30 
     lease-renewal-interval-in-seconds: 10
-    host1: per1
-    host2: per2
+    host1: eureka-server-1
+    host2: eureka-server-2
   client:
     # healthcheck:
     # enabled: true
