@@ -14,14 +14,6 @@ import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 public interface MainOrderReadDAO {
 	
 	/**
-	 * 查询订单信息
-	 * @param uniqueValue
-	 * @return
-	 * @throws Exception
-	public HnpOrderEntity getDTOByUniqueValue(Object uniqueValue) throws Exception;
-	*/
-	
-	/**
 	 * 按主订单号查询订单信息
 	 * @param mainOrderNo
 	 * @return

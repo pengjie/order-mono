@@ -710,40 +710,6 @@ public final class DateUtils {
         return b;
     }
 
-    public static void main(String[] args){
-    	/*
-        Date d1 = null;
-        Date d2 = null;
-        try {
-            d1 = DateUtils.StringToDate(DateUtils.datePattern, "2014-12-17 23:59:59");
-            d2 =DateUtils.StringToDate(DateUtils.datePattern, "2014-12-16 00:00:00");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        boolean flag = checkDate1WhetherBigerDate2(d1,d2);
-        System.out.println("==========="+flag);
-
-        DecimalFormat df=(DecimalFormat)DecimalFormat.getInstance();
-        df.applyLocalizedPattern("00000000000");
-        for(int i=1;i<5;i++){
-            System.out.println(df.format(i));
-        }
-        String tStr = String.valueOf(System.currentTimeMillis());
-        System.out.println(tStr);
-        tStr = String.valueOf(System.currentTimeMillis());
-        System.out.println(tStr);
-        tStr = String.valueOf(System.currentTimeMillis());
-        System.out.println(tStr);
-        */
-    	
-    	Date d3= getNextDay(new Date(),-1);
-    	System.out.println(formatDateyyyymmdd(d3));
-    	String str1="11:40";
-    	String str2="11:30";
-    	System.out.println("测试时间差:"+getTwoHour(str1,str2));
-
-    }
     /**
      * 判断date是否大于或者小于当前时间一天
      * @param date

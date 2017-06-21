@@ -11,13 +11,13 @@ import java.util.TreeMap;
 
 public class ParamUtil {
 	/**
-	 * @param dto
+	 * @param obj
 	 */
-	public static Map<String, Object> putParam(Object dto) {
+	public static Map<String, Object> putParam(Object obj) {
 		Map<String, Object> returnMap = new HashMap<String, Object>();
 		try {
-			if (dto != null) {
-				Field[] fields = dto.getClass().getDeclaredFields();
+			if (obj != null) {
+				Field[] fields = obj.getClass().getDeclaredFields();
 				if (fields != null) {
 					for (Field f : fields) {
 						String property = f.getName();
@@ -26,10 +26,10 @@ public class ParamUtil {
 							try {
 								// getMethod =
 								// bean.getClass().getDeclaredMethod(property);
-								PropertyDescriptor pdp = new PropertyDescriptor(property, dto.getClass());
+								PropertyDescriptor pdp = new PropertyDescriptor(property, obj.getClass());
 								getMethod = pdp.getReadMethod();
 								if (getMethod != null) {
-									returnMap.put(property, getMethod.invoke(dto));
+									returnMap.put(property, getMethod.invoke(obj));
 								}
 							} catch (Exception e) {
 								continue;
@@ -39,7 +39,7 @@ public class ParamUtil {
 					}
 				}
 
-				Class<?> superClass = dto.getClass().getSuperclass();
+				Class<?> superClass = obj.getClass().getSuperclass();
 				fields = superClass.getDeclaredFields();
 				if (fields != null) {
 					for (Field f : fields) {
@@ -49,10 +49,10 @@ public class ParamUtil {
 							try {
 								// getMethod =
 								// bean.getClass().getDeclaredMethod(property);
-								PropertyDescriptor pdp = new PropertyDescriptor(property, dto.getClass());
+								PropertyDescriptor pdp = new PropertyDescriptor(property, obj.getClass());
 								getMethod = pdp.getReadMethod();
 								if (getMethod != null) {
-									returnMap.put(property, getMethod.invoke(dto));
+									returnMap.put(property, getMethod.invoke(obj));
 								}
 							} catch (Exception e) {
 								continue;
@@ -69,18 +69,18 @@ public class ParamUtil {
 	}
 	
 	/**
-     * 将DTO里的属性值反射到MAP参数列表中
+     * 将obj里的属性值反射到MAP参数列表中
      * 
      * @param param
-     * @param dto
+     * @param obj
      */
-    public static Map<String, String> putParamStr(Object dto) {
+    public static Map<String, String> putParamStr(Object obj) {
         Map<String, String> param = new HashMap<String, String>();
         try {
-            if (dto != null) {
-                for (Field field : dto.getClass().getDeclaredFields()) {
+            if (obj != null) {
+                for (Field field : obj.getClass().getDeclaredFields()) {
                     field.setAccessible(true);
-                    param.put(field.getName(), field.get(dto)==null?null:field.get(dto).toString());
+                    param.put(field.getName(), field.get(obj)==null?null:field.get(obj).toString());
                 }
             }
         } catch (Exception e) {
