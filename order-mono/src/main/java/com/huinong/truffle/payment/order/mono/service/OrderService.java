@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.huinong.truffle.component.base.constants.BaseResult;
 import com.huinong.truffle.component.base.constants.ResultCode;
+import com.huinong.truffle.component.base.util.object.ObjectUtils;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
@@ -30,7 +31,6 @@ import com.huinong.truffle.payment.order.mono.domain.HnpMainOrder;
 import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
-import com.huinong.truffle.payment.order.mono.util.CopyBeanUtil;
 
 @Service("orderService")
 public class OrderService {
@@ -79,7 +79,7 @@ public class OrderService {
 				if(mainOrderEntity.getMsgUUID().equals(mainOrder.getObjectUUID())){
 					//数据一致 直接返回订单信息
 					HnpMainOrder returnbean = new HnpMainOrder();
-					CopyBeanUtil.getInstance().copyBeanProperties(mainOrderEntity, returnbean);
+					ObjectUtils.mergeProperties(returnbean, mainOrderEntity);
 					return BaseResult.success(returnbean);
 				}else{
 					//数据不一致 删除该订单下的信息，重新创建订单
@@ -123,7 +123,7 @@ public class OrderService {
 	/**
 	 * 新增订单信息记录
 	 * 
-	 * @param hnpOrderDTO
+	 * @param hnpOrder
 	 * @return
 	 * @throws Exception
 	 */
@@ -152,7 +152,7 @@ public class OrderService {
 		}
 		addBatchItem(mainOrder.getData(),mainOrder.getSourceSys());
 		HnpMainOrder result = new HnpMainOrder();
-		CopyBeanUtil.getInstance().copyBeanProperties(record, result);
+		ObjectUtils.mergeProperties(result, record);
 		return BaseResult.success(result);
 	}
 	
@@ -243,9 +243,9 @@ public class OrderService {
 				logger.info("参数异常：主订单信息为空");
 				return BaseResult.fail(OrderResultCode.PARAM_0004);
 			}
-			HnpMainOrder returnDTO = new HnpMainOrder();
-			CopyBeanUtil.getInstance().copyBeanProperties(mainOrderEntity,returnDTO);
-			return BaseResult.success(returnDTO);
+			HnpMainOrder result = new HnpMainOrder();
+			ObjectUtils.mergeProperties(result, mainOrderEntity);
+			return BaseResult.success(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return BaseResult.fail(OrderResultCode.DB_0021);
@@ -258,8 +258,8 @@ public class OrderService {
 	private boolean compareTwoAmtIsEqual(List<HnpOrder> item,
 			Double totalAmount) {
 		Double itemAmt = 0.0d;
-		for (HnpOrder dto : item) {
-			itemAmt = itemAmt + dto.getAmt().doubleValue();
+		for (HnpOrder bean : item) {
+			itemAmt = itemAmt + bean.getAmt().doubleValue();
 		}
 		if (null == totalAmount) {
 			totalAmount = 0.0d;
@@ -283,7 +283,7 @@ public class OrderService {
 			HnpOrder returnbean = null ;
 			for(HnpOrderEntity entity : orderlist){
 				returnbean = new HnpOrder();
-				CopyBeanUtil.getInstance().copyBeanProperties(entity, returnbean);
+				ObjectUtils.mergeProperties(returnbean, entity);
 				returnList.add(returnbean);
 			}
 		} catch (Exception e) {
@@ -317,7 +317,7 @@ public class OrderService {
 		}
 		
 		HnpMainOrder mainOrder = new HnpMainOrder();
-		CopyBeanUtil.getInstance().copyBeanProperties(mainOrderEntity, mainOrder);
+		ObjectUtils.mergeProperties(mainOrder, mainOrderEntity);
 		return BaseResult.success(mainOrder);
 	}
 
@@ -358,7 +358,7 @@ public class OrderService {
 			int j = orderWriteDAO.updateByMainOrderNoSelective(orderRecord);
 			if (i > 0 && j > 0) {
 				HnpMainOrder mainOrder = new HnpMainOrder();
-				CopyBeanUtil.getInstance().copyBeanProperties(mainOrderEntity, mainOrder);
+				ObjectUtils.mergeProperties(mainOrder, mainOrderEntity);
 				return BaseResult.success(mainOrder);
 			} else {
 				logger.info("更新订单状态失败");
@@ -392,7 +392,7 @@ public class OrderService {
 				return BaseResult.fail(OrderResultCode.DB_0005);
 			}
 			HnpOrder returnbean = new HnpOrder();
-			CopyBeanUtil.getInstance().copyBeanProperties(orderEntity,returnbean);
+			ObjectUtils.mergeProperties(returnbean, orderEntity);
 			return BaseResult.success(returnbean);
 		} catch (Exception e) {
 			e.printStackTrace();

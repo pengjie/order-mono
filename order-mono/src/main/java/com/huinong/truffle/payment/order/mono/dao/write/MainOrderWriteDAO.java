@@ -15,12 +15,11 @@ public interface MainOrderWriteDAO {
 	
 	/**
 	 * 添加主订单
-	 * @param dto
+	 * @param record
 	 * @return
 	 * @throws Exception
 	 */
 	public int insert(HnpMainOrderEntity record);
-	/*public Long addMainOrder(HnpOrderEntity dto) throws Exception ;*/
 	
 	
 	/**

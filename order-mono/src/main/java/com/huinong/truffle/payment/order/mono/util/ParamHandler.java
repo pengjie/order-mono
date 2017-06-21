@@ -140,7 +140,7 @@ public class ParamHandler {
 	 * @param classOfT
 	 * @return
 	 */
-	public <T> T getDTO(Class<T> classOfT) {
+	public <T> T getBean(Class<T> classOfT) {
 		return gson.fromJson(gson.toJson(map), classOfT);
 	}
 	

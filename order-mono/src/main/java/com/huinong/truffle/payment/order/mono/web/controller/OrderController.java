@@ -48,11 +48,11 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/create", method = {RequestMethod.POST})
     public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
 	    logger.info("[订单服务][预支付]请求参数:"+gson.toJson(mainOrder));
-	    BaseResult<HnpMainOrder> resultDTO = new BaseResult<HnpMainOrder>();
+	    BaseResult<HnpMainOrder> result = new BaseResult<HnpMainOrder>();
 	    try {
-	    	resultDTO = orderService.createOrder(mainOrder);
-	    	logger.info("[订单服务][预支付]返回参数:"+gson.toJson(resultDTO));
-	    	return resultDTO;
+	    	result = orderService.createOrder(mainOrder);
+	    	logger.info("[订单服务][预支付]返回参数:"+gson.toJson(result));
+	    	return result;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return BaseResult.fail(OrderResultCode.SYS_0001);
@@ -72,9 +72,9 @@ public class OrderController extends BaseController{
     @RequestMapping(value = "/query", method= {RequestMethod.POST})
 	public BaseResult<HnpMainOrder> query(String mainOrderNo){
 	    logger.info("[订单服务][查询]请求参数:mainOrderNo="+mainOrderNo);
-	    BaseResult<HnpMainOrder> resultDTO  = orderService.queryMainOrder(mainOrderNo);
-	    logger.info("[订单服务][查询]返回参数:"+gson.toJson(resultDTO));
-    	return resultDTO ;
+	    BaseResult<HnpMainOrder> result  = orderService.queryMainOrder(mainOrderNo);
+	    logger.info("[订单服务][查询]返回参数:"+gson.toJson(result));
+    	return result ;
 	}
 	
 	/**
@@ -90,9 +90,9 @@ public class OrderController extends BaseController{
     @RequestMapping(value = "/querylist", method= RequestMethod.POST)
     public BaseResult<List<HnpOrder>> querylist(String mainOrderNo){
         logger.info("[订单服务][查询]请求参数:mainOrderNo="+mainOrderNo);
-        BaseResult<List<HnpOrder>> resultDTO = orderService.queryDetail(mainOrderNo);
-        logger.info("[订单服务][查询]返回参数:"+gson.toJson(resultDTO));
-    	return resultDTO ;
+        BaseResult<List<HnpOrder>> result = orderService.queryDetail(mainOrderNo);
+        logger.info("[订单服务][查询]返回参数:"+gson.toJson(result));
+    	return result ;
     }
     
     /**
@@ -109,11 +109,11 @@ public class OrderController extends BaseController{
     public BaseResult<HnpMainOrder> finish(String mainOrderNo){
         logger.info("[订单服务][完结订单]请求参数:mainOrderNo="+mainOrderNo);
         Integer orderState = OrderStateEnum.ORDER_2.val ;
-        BaseResult<HnpMainOrder> resultDTO = new BaseResult<HnpMainOrder>();
+        BaseResult<HnpMainOrder> result = new BaseResult<HnpMainOrder>();
 		try {
-			resultDTO = orderService.finishOrder(mainOrderNo,orderState);
-			logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(resultDTO));
-			return resultDTO;
+			result = orderService.finishOrder(mainOrderNo,orderState);
+			logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(result));
+			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return BaseResult.fail(OrderResultCode.SYS_0001);
