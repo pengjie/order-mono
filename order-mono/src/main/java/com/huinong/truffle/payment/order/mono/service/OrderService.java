@@ -76,7 +76,7 @@ public class OrderService {
 					return BaseResult.fail(OrderResultCode.DB_0002);
 				}
 				// 重新预支付订单在订单存在情况下需要确认订单数据是否一致
-				if(mainOrderEntity.getMsgUUID().equals(mainOrder.getObjectUUID())){
+				if(mainOrderEntity.getMsgUUID().equals(mainOrder.genObjectUUID())){
 					//数据一致 直接返回订单信息
 					HnpMainOrder returnbean = new HnpMainOrder();
 					ObjectUtils.mergeProperties(returnbean, mainOrderEntity);
@@ -144,7 +144,7 @@ public class OrderService {
 		record.setSourceSys(mainOrder.getSourceSys());
 		record.setTotalAmt(mainOrder.getTotalAmt());
 		record.setOrderState(OrderStateEnum.ORDER_0.val.intValue());
-		record.setMsgUUID(mainOrder.getObjectUUID());
+		record.setMsgUUID(mainOrder.genObjectUUID());
 		int i = mainOrderWriteDAO.insert(record);
 		if(i <= 0){
 			logger.info("添加订单信息失败"); 

@@ -118,7 +118,7 @@ private static final long serialVersionUID = 1L;
 	/**
      * 获取对象内容的UUID 用于前后两次交互比较
      */
-    public String getObjectUUID(){
+    public String genObjectUUID(){
         StringBuilder buffer = new StringBuilder();
         buffer.append(0);
         buffer.append(StringUtils.isBlank(sourceSys) ? "req_from":sourceSys);
