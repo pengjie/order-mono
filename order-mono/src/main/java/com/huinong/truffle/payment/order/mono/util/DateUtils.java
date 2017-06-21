@@ -710,7 +710,7 @@ public final class DateUtils {
         return b;
     }
 
-    public static void main(String[] args){
+    public static void main2(String[] args){
     	/*
         Date d1 = null;
         Date d2 = null;
