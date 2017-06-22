@@ -113,7 +113,7 @@ public class OrderService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("创建订单异常："+e);
-			throw e ;
+			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
 				lock.unlock();
@@ -382,7 +382,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw e ;
+			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
 				lock.unlock();
