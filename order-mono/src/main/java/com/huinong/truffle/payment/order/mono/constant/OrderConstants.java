@@ -108,5 +108,33 @@ public class OrderConstants {
             this.val = val ;
         }
     }
-
+    
+    //订单聚合服务传入订单状态 - Integer orderState = OrderStateEnum.ORDER_2.val ;
+    public static enum PayResultEnum{
+        /**成功**/
+    	SUCCESS("SUCCESS",2),
+        /**支付中**/
+    	PROCESSING("PROCESSING",1);
+        public String key;
+        public Integer val ;
+        PayResultEnum(String key,Integer val){
+            this.val = val ;
+            this.key = key ;
+        }
+        public static boolean isDefinition(String key) {
+            for (PayResultEnum type : PayResultEnum.values()) {
+                if (type.key.equals(key))
+                    return true;
+            }
+            return false;
+        }
+        
+        public static PayResultEnum getTypeByKey(String key) {
+            for (PayResultEnum type : PayResultEnum.values()) {
+            	 if (type.key.equals(key))
+                    return type;
+            }
+            return null;
+        }
+    }
 }

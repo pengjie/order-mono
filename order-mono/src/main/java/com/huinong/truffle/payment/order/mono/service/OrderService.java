@@ -22,6 +22,7 @@ import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisCli
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
+import com.huinong.truffle.payment.order.mono.constant.OrderConstants.PayResultEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.MainOrderReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.read.OrderReadDAO;
@@ -76,7 +77,7 @@ public class OrderService {
 					return BaseResult.fail(OrderResultCode.DB_0002);
 				}
 				// 重新预支付订单在订单存在情况下需要确认订单数据是否一致
-				if(mainOrderEntity.getMsgUUID().equals(mainOrder.getObjectUUID())){
+				if(mainOrderEntity.getMsgUUID().equals(mainOrder.genObjectUUID())){
 					//数据一致 直接返回订单信息
 					HnpMainOrder returnbean = new HnpMainOrder();
 					ObjectUtils.mergeProperties(returnbean, mainOrderEntity);
@@ -112,7 +113,7 @@ public class OrderService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("创建订单异常："+e);
-			throw e ;
+			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
 				lock.unlock();
@@ -144,13 +145,13 @@ public class OrderService {
 		record.setSourceSys(mainOrder.getSourceSys());
 		record.setTotalAmt(mainOrder.getTotalAmt());
 		record.setOrderState(OrderStateEnum.ORDER_0.val.intValue());
-		record.setMsgUUID(mainOrder.getObjectUUID());
+		record.setMsgUUID(mainOrder.genObjectUUID());
 		int i = mainOrderWriteDAO.insert(record);
 		if(i <= 0){
 			logger.info("添加订单信息失败"); 
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
-		addBatchItem(mainOrder.getData(),mainOrder.getSourceSys());
+		addBatchItem(mainOrder.getData(),mainOrder.getMainOrderNo(),mainOrder.getSourceSys());
 		HnpMainOrder result = new HnpMainOrder();
 		ObjectUtils.mergeProperties(result, record);
 		return BaseResult.success(result);
@@ -159,7 +160,7 @@ public class OrderService {
 	/**
 	 * 批量添加订单明细
 	 */
-	private int addBatchItem(List<HnpOrder> orderItem,String orderFromSystem) throws Exception{
+	private int addBatchItem(List<HnpOrder> orderItem,String mainOrderNo,String orderFromSystem) throws Exception{
         if(null == orderItem || orderItem.size() == 0) {
             logger.info("批量插的入参对象为空...");
             throw new Exception("批量插的入参对象为空...");
@@ -169,11 +170,11 @@ public class OrderService {
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
         for(int i=0 ; i<orderItem.size();i++){
         	HnpOrder order = orderItem.get(i);
-        	serialNumber = order.getGroupOrderNo() + String.format("%04d", (++i));
+        	serialNumber = mainOrderNo + String.format("%04d", (++i));
         	orderEntity = new HnpOrderEntity();
         	orderEntity.setAppId(order.getAppId());
         	orderEntity.setAmt(order.getAmt());
-        	orderEntity.setGroupOrderNo(order.getGroupOrderNo());
+        	orderEntity.setGroupOrderNo(mainOrderNo);
         	orderEntity.setInUid(order.getInUid());
         	orderEntity.setInUname(order.getInUname());
         	orderEntity.setMerchantOffAmt(new BigDecimal("0.0"));
@@ -294,6 +295,7 @@ public class OrderService {
 	}
 
 	
+	/*@Transactional
 	public BaseResult<HnpMainOrder> updateOrder(String mainOrderNo,Integer orderStatus) throws Exception {
 		if (StringUtils.isBlank(mainOrderNo)) {
 			logger.info("参数{订单号}为空");
@@ -308,30 +310,44 @@ public class OrderService {
 			logger.info("查询订单不存在");
 			return BaseResult.fail(OrderResultCode.DB_0005);
 		}
-		HnpMainOrderEntity record = new HnpMainOrderEntity();
-		record.setMainOrderNo(mainOrderNo);
-		record.setOrderState(orderStatus);;
-		int i = mainOrderWriteDAO.updateByMainOrderNo(record);
-		if(i ==0){
+		//主订单
+		HnpMainOrderEntity mainRecord = new HnpMainOrderEntity();
+		mainRecord.setMainOrderNo(mainOrderNo);
+		mainRecord.setOrderState(orderStatus);
+		int i = mainOrderWriteDAO.updateByMainOrderNo(mainRecord);
+		//子订单
+		HnpOrderEntity orderRecord = new HnpOrderEntity();
+		orderRecord.setGroupOrderNo(mainOrderNo);
+		orderRecord.setPayState(String.valueOf(orderStatus));
+		int j = orderWriteDAO.updateByMainOrderNoSelective(orderRecord);
+		if (i > 0 && j > 0) {
+			HnpMainOrder mainOrder = new HnpMainOrder();
+			ObjectUtils.mergeProperties(mainOrder, mainOrderEntity);
+			return BaseResult.success(mainOrder);
+		} else {
+			logger.info("更新订单状态失败");
 			return BaseResult.fail(OrderResultCode.DB_0006);
 		}
-		
-		HnpMainOrder mainOrder = new HnpMainOrder();
-		ObjectUtils.mergeProperties(mainOrder, mainOrderEntity);
-		return BaseResult.success(mainOrder);
-	}
+	}*/
 
 	@Transactional
-	public BaseResult<HnpMainOrder> finishOrder(String mainOrderNo,Integer orderStatus) throws Exception {
+	public BaseResult<HnpMainOrder> finishOrder(String mainOrderNo,String payStatus) throws Exception {
 		if (StringUtils.isBlank(mainOrderNo)) {
 			logger.info("参数{订单号}为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
 		}
-		if (null == orderStatus) {
+		if (StringUtils.isBlank(payStatus)) {
 			logger.info("参数{订单状态}为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0004);
 		}
-
+		
+		if(!PayResultEnum.isDefinition(payStatus)){
+			logger.info("参数{订单状态}不在自定值范围内(PROCESSING-支付中,SUCCESS-支付成功)");
+			return BaseResult.fail(OrderResultCode.PARAM_0033);
+		}
+		
+		//订单状态
+		Integer orderStatus = PayResultEnum.getTypeByKey(payStatus).val ;
 		RedisLock lock = null;
 		try {
 			// 0 对每一笔预支付订单进行锁处理，防止重复提交
@@ -366,7 +382,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw e ;
+			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
 				lock.unlock();
