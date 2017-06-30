@@ -43,9 +43,9 @@ public class HnpOrder implements Serializable {
 	private Long id;
 	@ApiModelProperty(value="平台标识0" ,hidden=true)
     private Integer appId = 0;
-	@ApiModelProperty(value="",hidden=true)
+	@ApiModelProperty(value="订单业务系统优惠金额",hidden=true)
     private BigDecimal sysOffAmt;
-	@ApiModelProperty(value="",hidden=true)
+	@ApiModelProperty(value="支付平台优惠金额",hidden=true)
     private BigDecimal payOffAmt;
 	@ApiModelProperty(value="支付订单时间",hidden=true)
     private Date orderTimestamp;
