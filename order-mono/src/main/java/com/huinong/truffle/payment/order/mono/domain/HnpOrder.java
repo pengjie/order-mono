@@ -47,7 +47,7 @@ public class HnpOrder implements Serializable {
     private BigDecimal sysOffAmt;
 	@ApiModelProperty(value="",hidden=true)
     private BigDecimal payOffAmt;
-	@ApiModelProperty(value="",hidden=true)
+	@ApiModelProperty(value="支付订单时间",hidden=true)
     private Date orderTimestamp;
 	@ApiModelProperty(value="订单状态",hidden=true)
     private String payState;
@@ -270,7 +270,7 @@ public class HnpOrder implements Serializable {
         this.serialNumber = serialNumber == null ? null : serialNumber.trim();
     }
     
-    /**
+	/**
      * 获取订单是否已结算(待买家确认)
      * @return
      */

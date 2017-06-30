@@ -20,7 +20,7 @@ public class HnpMainOrderEntity implements Serializable {
 	//主订单编号
     private String mainOrderNo;
     //系统来源
-    private String sourceSys;
+    private String orderFromSystem;
     //订单金额
     private BigDecimal totalAmt;
     //买家账户ID
@@ -48,11 +48,11 @@ public class HnpMainOrderEntity implements Serializable {
 	public void setMainOrderNo(String mainOrderNo) {
 		this.mainOrderNo = mainOrderNo;
 	}
-	public String getSourceSys() {
-		return sourceSys;
+	public String getOrderFromSystem() {
+		return orderFromSystem;
 	}
-	public void setSourceSys(String sourceSys) {
-		this.sourceSys = sourceSys;
+	public void setOrderFromSystem(String orderFromSystem) {
+		this.orderFromSystem = orderFromSystem;
 	}
 	public BigDecimal getTotalAmt() {
 		return totalAmt;

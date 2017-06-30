@@ -68,4 +68,21 @@
     where group_order_no = #{mainOrderNo,jdbcType=VARCHAR}
   </select>   
   
+  <!-- 查询订单列表 -->
+  <select id="listBySelective" resultMap="BaseResultMap" parameterType="com.huinong.truffle.payment.order.mono.domain.OrderQuery" >
+    select 
+    <include refid="Base_Column_List" />
+    from hnp_order
+    where order_timestamp between #{startDate,jdbcType=TIMESTAMP} and #{endDate,jdbcType=TIMESTAMP}
+    <if test="orderNo != null and orderNo != ''">
+    	and order_id = #{orderNo,jdbcType=VARCHAR}
+    </if>
+    <if test="mainOrderNo != null and mainOrderNo != ''">
+    	and group_order_no = #{mainOrderNo,jdbcType=VARCHAR}
+    </if>
+    <if test="orderSerialNumber != null and orderSerialNumber != ''">
+    	and serial_number = #{orderSerialNumber,jdbcType=VARCHAR}
+    </if>
+  </select>   
+  
 </mapper>

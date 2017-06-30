@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.pagehelper.PageHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.huinong.truffle.component.base.constants.BaseResult;
+import com.huinong.truffle.component.base.constants.PageValue;
 import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.component.base.util.object.ObjectUtils;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
@@ -30,6 +32,7 @@ import com.huinong.truffle.payment.order.mono.dao.write.MainOrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.dao.write.OrderWriteDAO;
 import com.huinong.truffle.payment.order.mono.domain.HnpMainOrder;
 import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
+import com.huinong.truffle.payment.order.mono.domain.OrderQuery;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 
@@ -142,7 +145,7 @@ public class OrderService {
 		record.setModifyTime(new Date());
 		record.setOrderState(mainOrder.getOrderState());
 		record.setOutUid(mainOrder.getOutUid());
-		record.setSourceSys(mainOrder.getSourceSys());
+		record.setOrderFromSystem(mainOrder.getOrderFromSystem());
 		record.setTotalAmt(mainOrder.getTotalAmt());
 		record.setOrderState(OrderStateEnum.ORDER_0.val.intValue());
 		record.setMsgUUID(mainOrder.genObjectUUID());
@@ -151,7 +154,7 @@ public class OrderService {
 			logger.info("添加订单信息失败"); 
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
-		addBatchItem(mainOrder.getData(),mainOrder.getMainOrderNo(),mainOrder.getSourceSys());
+		addBatchItem(mainOrder.getData(),mainOrder.getMainOrderNo(),mainOrder.getOrderFromSystem());
 		HnpMainOrder result = new HnpMainOrder();
 		ObjectUtils.mergeProperties(result, record);
 		return BaseResult.success(result);
@@ -201,7 +204,7 @@ public class OrderService {
 	 * 校验参数
 	 */
 	private BaseResult<Void> checkReqMsg(HnpMainOrder mainOrder) {
-		if (StringUtils.isBlank(mainOrder.getSourceSys())){
+		if (StringUtils.isBlank(mainOrder.getOrderFromSystem())){
 			logger.info("订单确认失败,平台来源为空");
 			return BaseResult.fail(OrderResultCode.PARAM_0027);
 		}
@@ -447,6 +450,26 @@ public class OrderService {
 			return BaseResult.fail(OrderResultCode.DB_0024);
 		}
 		return BaseResult.success();
+	}
+	
+	/**
+	 * 分页查询订单列表
+	 * @param query
+	 * @return
+	 */
+	public BaseResult<PageValue<HnpOrder>> queryPageOrderData(OrderQuery query){
+		try {
+			Integer pageNum = query.getPageNum() == null?1:query.getPageNum() ;
+            Integer pageSize = query.getPageSize() == null?10: query.getPageSize();
+            PageHelper.startPage(pageNum, pageSize);
+            List<HnpOrderEntity> orderlist = orderReadDAO.listBySelective(query);
+            PageValue<HnpOrderEntity> orderEntity = new PageValue<HnpOrderEntity>(orderlist);
+            PageValue<HnpOrder> orderValue = ObjectUtils.transfer(orderEntity);
+            return new BaseResult<PageValue<HnpOrder>>(orderValue);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BaseResult.fail(OrderResultCode.DB_0021);
+		}
 	}
 	
 }

@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.huinong.truffle.component.base.component.version.anno.ApiVersion;
 import com.huinong.truffle.component.base.constants.BaseResult;
+import com.huinong.truffle.component.base.constants.PageValue;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.domain.HnpMainOrder;
 import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
+import com.huinong.truffle.payment.order.mono.domain.OrderQuery;
 import com.huinong.truffle.payment.order.mono.service.OrderService;
 
 
@@ -138,7 +140,12 @@ public class OrderController extends BaseController{
     	return result;
     }
     
-    
+    /**
+     * 平台付款完成-更新订单状态
+     * @param serialNumber
+     * @param state
+     * @return
+     */
     @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="平台付款完成-订单详情-更新状态", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回<Void>")
     @ApiImplicitParams({
@@ -153,6 +160,21 @@ public class OrderController extends BaseController{
     	return result;
     }
     
+    
+    /**
+     * 分页查询订单列表
+     * @param orderQuery
+     * @return
+     */
+    @ApiVersion(1)
+    @ApiOperation(author="彭杰",status=Status.UN_COMPLETE,value="分页查询订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单列表")
+    @RequestMapping(value = "/queryPageOrderData", method= RequestMethod.POST)
+    public BaseResult<PageValue<HnpOrder>> queryPageOrderData(OrderQuery orderQuery){
+    	logger.info("[订单服务][分页查询订单列表]请求参数:"+gson.toJson(orderQuery));
+    	BaseResult<PageValue<HnpOrder>> result = orderService.queryPageOrderData(orderQuery);
+    	logger.info("[订单服务][分页查询订单列表]请求返回:"+gson.toJson(result));
+    	return result ;
+    }
     
     
 }

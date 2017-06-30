@@ -30,7 +30,7 @@ private static final long serialVersionUID = 1L;
     private String mainOrderNo;
     //系统来源
 	@ApiModelProperty(value="系统来源(HNW|HNYX)",required=true)
-    private String sourceSys;
+    private String orderFromSystem;
     //订单金额
 	@ApiModelProperty(value="订单金额",required=true)
     private BigDecimal totalAmt;
@@ -66,11 +66,11 @@ private static final long serialVersionUID = 1L;
 	public void setMainOrderNo(String mainOrderNo) {
 		this.mainOrderNo = mainOrderNo;
 	}
-	public String getSourceSys() {
-		return sourceSys;
+	public String getOrderFromSystem() {
+		return orderFromSystem;
 	}
-	public void setSourceSys(String sourceSys) {
-		this.sourceSys = sourceSys;
+	public void setOrderFromSystem(String orderFromSystem) {
+		this.orderFromSystem = orderFromSystem;
 	}
 	public BigDecimal getTotalAmt() {
 		return totalAmt;
@@ -121,7 +121,7 @@ private static final long serialVersionUID = 1L;
     public String genObjectUUID(){
         StringBuilder buffer = new StringBuilder();
         buffer.append(0);
-        buffer.append(StringUtils.isBlank(sourceSys) ? "req_from":sourceSys);
+        buffer.append(StringUtils.isBlank(orderFromSystem) ? "req_from":orderFromSystem);
         buffer.append(StringUtils.isBlank(mainOrderNo) ? "mainOrderNo":mainOrderNo);
         buffer.append(null == totalAmt ? "totalAmount":totalAmt);
         buffer.append(null == outUid ? "appPayerId":outUid);

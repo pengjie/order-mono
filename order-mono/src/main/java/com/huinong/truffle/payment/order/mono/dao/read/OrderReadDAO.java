@@ -2,6 +2,7 @@ package com.huinong.truffle.payment.order.mono.dao.read;
 
 import java.util.List;
 
+import com.huinong.truffle.payment.order.mono.domain.OrderQuery;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 
 /**
@@ -39,6 +40,14 @@ public interface OrderReadDAO {
      * @return
      */
     public List<HnpOrderEntity> listByMainOrderNo(String mainOrderNo) ;
+    
+    
+    /**
+     * 查询订单列表
+     * @param record
+     * @return
+     */
+    public List<HnpOrderEntity> listBySelective(OrderQuery record) ;
 
 
 }
