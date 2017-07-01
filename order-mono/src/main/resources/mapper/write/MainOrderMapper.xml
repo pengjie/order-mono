@@ -4,11 +4,11 @@
 	
 	<!-- 新增主订单信息 -->
 	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity" >
-    insert into hnp_main_order (main_order_no, source_sys, 
+    insert into hnp_main_order (main_order_no, order_from_system, 
       total_amt, out_uid, hnchannel, 
       order_state, create_time, modify_time,msg_uuid
       )
-    values (#{mainOrderNo,jdbcType=VARCHAR}, #{sourceSys,jdbcType=VARCHAR}, 
+    values (#{mainOrderNo,jdbcType=VARCHAR}, #{orderFromSystem,jdbcType=VARCHAR}, 
       #{totalAmt,jdbcType=DECIMAL}, #{outUid,jdbcType=BIGINT}, #{hnchannel,jdbcType=VARCHAR}, 
       #{orderState,jdbcType=TINYINT}, now(), now(),#{msgUUID,jdbcType=VARCHAR}
       )

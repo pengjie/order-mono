@@ -10,7 +10,7 @@ import com.huinong.truffle.component.base.constants.ResultCodeIntf;
 public enum OrderResultCode implements ResultCodeIntf {
 	
 	//系统异常 1
-    SYS_0001(000,"订单服务异常"),
+    SYS_0001(-1000,"订单服务异常"),
     //DB 异常 2
     DB_0002(4002,"订单已支付，请勿重新支付"),
 	DB_0003(4003,"创建订单失败"),
