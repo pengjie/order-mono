@@ -121,12 +121,12 @@ private static final long serialVersionUID = 1L;
     public String genObjectUUID(){
         StringBuilder buffer = new StringBuilder();
         buffer.append(0);
-        buffer.append(StringUtils.isBlank(orderFromSystem) ? "req_from":orderFromSystem);
-        buffer.append(StringUtils.isBlank(mainOrderNo) ? "mainOrderNo":mainOrderNo);
-        buffer.append(null == totalAmt ? "totalAmount":totalAmt);
-        buffer.append(null == outUid ? "appPayerId":outUid);
-        buffer.append(StringUtils.isBlank(hnchannel) ? "hnchannel":hnchannel);
-        buffer.append((data == null || data.size()==0) ? "data":data);
+        buffer.append(orderFromSystem);
+        buffer.append(mainOrderNo);
+        buffer.append(totalAmt);
+        buffer.append(outUid);
+        buffer.append(hnchannel);
+        buffer.append(data);
         return MD5Util.MD5Encode(buffer.toString(), "UTF-8").toUpperCase();
     }
 }

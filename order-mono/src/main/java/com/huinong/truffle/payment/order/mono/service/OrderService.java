@@ -86,32 +86,13 @@ public class OrderService {
 					ObjectUtils.mergeProperties(returnbean, mainOrderEntity);
 					return BaseResult.success(returnbean);
 				}else{
-					//数据不一致 删除该订单下的信息，重新创建订单
-					BaseResult<Void> checkMsgResp = checkReqMsg(mainOrder);
-					if(checkMsgResp.getCode() != ResultCode.SUCCESS.getCode()){
-						return new BaseResult<HnpMainOrder>(checkMsgResp.getCode(),checkMsgResp.getMsg());
-					}
 					// 删除以前的主订单和明细数据 加入新的订单信息
 					mainOrderWriteDAO.delMainOrder(mainOrderEntity.getId());
 					orderWriteDAO.deleteByMainOrderNo(mainOrderNo);
-					// 新增订单信息
-					BaseResult<HnpMainOrder> mainOrderResult = addOrderRecords(mainOrder);
-					if(null == mainOrderResult || mainOrderResult.getCode() != ResultCode.SUCCESS.getCode()){
-						return new BaseResult<HnpMainOrder>(mainOrderResult.getCode(),mainOrderResult.getMsg());
-					}
-					return BaseResult.success(mainOrderResult.getData());
+					return persistOrder(mainOrder);
 				}
-			} else {// 新增
-				BaseResult<Void> checkMsgResp = checkReqMsg(mainOrder);
-				if(checkMsgResp.getCode() != ResultCode.SUCCESS.getCode()){
-					return new BaseResult<HnpMainOrder>(checkMsgResp.getCode(),checkMsgResp.getMsg());
-				}
-				// 新增订单信息
-				BaseResult<HnpMainOrder> mainOrderResult = addOrderRecords(mainOrder);
-				if(null == mainOrderResult || mainOrderResult.getCode() != ResultCode.SUCCESS.getCode()){
-					return new BaseResult<HnpMainOrder>(mainOrderResult.getCode(),mainOrderResult.getMsg());
-				}
-				return BaseResult.success(mainOrderResult.getData());
+			} else {
+				return persistOrder(mainOrder);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,6 +104,23 @@ public class OrderService {
 			}
 		}
 	}
+	
+	
+	
+	private BaseResult<HnpMainOrder> persistOrder(HnpMainOrder mainOrder) throws Exception{
+		// 新增
+		BaseResult<Void> checkMsgResp = checkReqMsg(mainOrder);
+		if(checkMsgResp.getCode() != ResultCode.SUCCESS.getCode()){
+			return new BaseResult<HnpMainOrder>(checkMsgResp.getCode(),checkMsgResp.getMsg());
+		}
+		// 新增订单信息
+		BaseResult<HnpMainOrder> mainOrderResult = addOrderRecords(mainOrder);
+		if(null == mainOrderResult || mainOrderResult.getCode() != ResultCode.SUCCESS.getCode()){
+			return new BaseResult<HnpMainOrder>(mainOrderResult.getCode(),mainOrderResult.getMsg());
+		}
+		return BaseResult.success(mainOrderResult.getData());
+	}
+	
 
 	/**
 	 * 新增订单信息记录
@@ -268,7 +266,7 @@ public class OrderService {
 		if (null == totalAmount) {
 			totalAmount = 0.0d;
 		}
-		return (itemAmt.doubleValue() - totalAmount.doubleValue() == 0) ? true: false;
+		return itemAmt.doubleValue() == totalAmount.doubleValue();
 	}
 
 	
@@ -381,7 +379,7 @@ public class OrderService {
 				return BaseResult.success(mainOrder);
 			} else {
 				logger.info("更新订单状态失败");
-				return BaseResult.fail(OrderResultCode.DB_0006);
+				throw new RuntimeException(OrderResultCode.DB_0006.getMsg());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
