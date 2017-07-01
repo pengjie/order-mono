@@ -24,10 +24,10 @@ public class OrderQuery implements Serializable {
     
     //订单创建开始日期
     @ApiModelProperty(value = "开始日期", required = true)
-    private Date startDate ;
+    private String startDate ;
     //订单创建结束日期
     @ApiModelProperty(value = "结束日期", required = true)
-    private Date endDate ;
+    private String endDate ;
     //订单编号
     @ApiModelProperty(value = "订单编号", required = false)
     private String orderNo ;
@@ -49,18 +49,7 @@ public class OrderQuery implements Serializable {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	public Date getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-	public Date getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+	
 	public String getOrderNo() {
 		return orderNo;
 	}
@@ -78,5 +67,17 @@ public class OrderQuery implements Serializable {
 	}
 	public void setOrderSerialNumber(String orderSerialNumber) {
 		this.orderSerialNumber = orderSerialNumber;
+	}
+	public String getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+	public String getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
 	}
 }
