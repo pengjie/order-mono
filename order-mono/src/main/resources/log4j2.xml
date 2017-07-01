@@ -5,12 +5,12 @@
 			<PatternLayout charset="UTF-8" pattern="[%-5p] %d %c - %m%n" />
 		</Console>
 
-		<RollingFile name="RollingFile" fileName="/home/logs/payment-order/payment-order.log" filePattern="/home/logs/payment-order/$${date:yyyy-MM}/payment-order-%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingFile name="RollingFile" fileName="/opt/logs/payment-order/payment-order.log" filePattern="/opt/logs/payment-order/$${date:yyyy-MM}/payment-order-%d{yyyy-MM-dd}-%i.log.gz">
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
             <SizeBasedTriggeringPolicy size="50MB" />
         </RollingFile>
-        <RollingFile name="RollingFileError" fileName="/home/logs/payment-order/payment-order_err.log" filePattern="/home/logs/payment-order/$${date:yyyy-MM}/payment-order_err-%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingFile name="RollingFileError" fileName="/opt/logs/payment-order/payment-order_err.log" filePattern="/opt/logs/payment-order/$${date:yyyy-MM}/payment-order_err-%d{yyyy-MM-dd}-%i.log.gz">
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY" />
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
             <SizeBasedTriggeringPolicy size="50MB" />

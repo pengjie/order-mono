@@ -5,12 +5,12 @@
 			<PatternLayout charset="UTF-8" pattern="[%-5p] %d %c - %m%n" />
 		</Console>
 
-		<RollingFile name="RollingFile" fileName="/home/logs/pay-order-mono/pay-order-mono.log" filePattern="/home/logs/pay-order-mono/$${date:yyyy-MM}/pay-order-mono-%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingFile name="RollingFile" fileName="/opt/logs/pay-order-mono/pay-order-mono.log" filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM}/pay-order-mono-%d{yyyy-MM-dd}-%i.log.gz">
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
             <SizeBasedTriggeringPolicy size="50MB" />
         </RollingFile>
-        <RollingFile name="RollingFileError" fileName="/home/logs/pay-order-mono/pay-order-mono_err.log" filePattern="/home/logs/pay-order-mono/$${date:yyyy-MM}/api-server_err-%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingFile name="RollingFileError" fileName="/opt/logs/pay-order-mono/pay-order-mono_err.log" filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM}/api-server_err-%d{yyyy-MM-dd}-%i.log.gz">
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY" />
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
             <SizeBasedTriggeringPolicy size="50MB" />
