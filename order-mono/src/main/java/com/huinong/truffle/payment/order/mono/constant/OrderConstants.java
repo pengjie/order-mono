@@ -1,6 +1,4 @@
 package com.huinong.truffle.payment.order.mono.constant;
-
-
 /**
  * 订单常量
  * @author peng
@@ -136,5 +134,14 @@ public class OrderConstants {
             }
             return null;
         }
+    }
+    
+    //日志（redis key）
+    public static enum Payment_Log{
+    	PAYMENT_LOG_ERROR("payment_log_error");
+    	public String val;
+    	Payment_Log(String val){
+    		this.val=val;
+    	}
     }
 }
