@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.huinong.truffle.payment.order.mono.util.MD5Util;
 
 /**
