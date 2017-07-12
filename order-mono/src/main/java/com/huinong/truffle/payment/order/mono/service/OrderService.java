@@ -243,7 +243,7 @@ public class OrderService {
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
 			if (null == mainOrderEntity) {
 				logger.info("参数异常：主订单信息为空");
-				return BaseResult.fail(OrderResultCode.PARAM_0004);
+				return BaseResult.fail(OrderResultCode.DB_0023);
 			}
 			HnpMainOrder result = new HnpMainOrder();
 			ObjectUtils.mergeProperties(result, mainOrderEntity);
