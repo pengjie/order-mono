@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration status="info" packages="com.huinong.truffle.payment.order.mono.component.logger">
 	<Appenders>
 		<Console name="CONSOLE" target="system_OUT">
 			<PatternLayout charset="UTF-8" pattern="[%-5p] %d %c - %m%n" />
@@ -15,6 +15,9 @@
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
             <SizeBasedTriggeringPolicy size="50MB" />
         </RollingFile>
+         <PaymentLogAppender name="PaymentLogAppender"  >
+       		<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%-5p] {%F:%L} - %m%n" />
+        </PaymentLogAppender>
 	</Appenders>
 
 	<Loggers>
@@ -26,6 +29,7 @@
 			<appender-ref ref="RollingFile" />
             <appender-ref ref="RollingFileError" />
 			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="PaymentLogAppender" />
 		</root>
 	</Loggers>
 </configuration>
