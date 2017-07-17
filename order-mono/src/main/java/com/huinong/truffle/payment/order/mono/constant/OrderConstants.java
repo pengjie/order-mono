@@ -144,4 +144,13 @@ public class OrderConstants {
     		this.val=val;
     	}
     }
+    
+    //是否验证 预支付 验证订单总额与子订单列表金额之和
+    public static enum VerifyAmtSwitchEnum{
+    	VERIFY_AMT_OPEN("Y"),VERIFY_AMT_DOWN("N");
+    	public String val ;
+    	VerifyAmtSwitchEnum(String val){
+    		this.val = val ;
+    	}
+    }
 }

@@ -16,22 +16,6 @@ import org.springframework.context.annotation.Configuration;
 public class OrderAppConf implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	/*//银行卡手续费
-    @Value("${handcharge.cardpay}")
-    private String bankCardFee;
-    
-    //微信手续费
-    @Value("${handcharge.wxpay}")
-    private String wxfee ;
-    
-    //支付宝手续费
-    @Value("${handcharge.alipay}")
-    private String alifee ;
-    
-    //快捷支付手续费
-    @Value("${handcharge.quickpay}")
-    private String quickfee ;*/
-    
     //zk 
     @Value("${zk.zkQuorurm}")
     private String zkQuorurm ;
@@ -39,38 +23,10 @@ public class OrderAppConf implements Serializable {
     @Value("${zk.serialGenZnode}")
     private String serialGenZnode ;
     
-
-  /*  public String getBankCardFee() {
-        return bankCardFee;
-    }
-
-    public void setBankCardFee(String bankCardFee) {
-        this.bankCardFee = bankCardFee;
-    }
-
-    public String getWxfee() {
-        return wxfee;
-    }
-
-    public void setWxfee(String wxfee) {
-        this.wxfee = wxfee;
-    }
-
-    public String getAlifee() {
-        return alifee;
-    }
-
-    public void setAlifee(String alifee) {
-        this.alifee = alifee;
-    }
-
-    public String getQuickfee() {
-        return quickfee;
-    }
-
-    public void setQuickfee(String quickfee) {
-        this.quickfee = quickfee;
-    }*/
+    //是否验证预支付 校验主订单支付金额和子订单金额之和
+    @Value("${order.verify.prepay.amt.switch}")
+    private String verifyAmtSwitch ;
+    
 
 	public String getZkQuorurm() {
 		return zkQuorurm;
@@ -88,11 +44,18 @@ public class OrderAppConf implements Serializable {
 		this.serialGenZnode = serialGenZnode;
 	}
 
-	/*@Override
+	public String getVerifyAmtSwitch() {
+		return verifyAmtSwitch;
+	}
+
+	public void setVerifyAmtSwitch(String verifyAmtSwitch) {
+		this.verifyAmtSwitch = verifyAmtSwitch;
+	}
+
+	@Override
 	public String toString() {
-		return "OrderAppConf [bankCardFee=" + bankCardFee + ", wxfee=" + wxfee
-				+ ", alifee=" + alifee + ", quickfee=" + quickfee
-				+ ", zkQuorurm=" + zkQuorurm + ", serialGenZnode="
-				+ serialGenZnode + "]";
-	}*/
+		return "OrderAppConf [zkQuorurm=" + zkQuorurm + ", serialGenZnode="
+				+ serialGenZnode + ", verifyAmtSwitch=" + verifyAmtSwitch + "]";
+	}
+	
 }
