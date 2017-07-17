@@ -21,10 +21,12 @@ import com.huinong.truffle.component.base.constants.ResultCode;
 import com.huinong.truffle.component.base.util.object.ObjectUtils;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
+import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.PayResultEnum;
+import com.huinong.truffle.payment.order.mono.constant.OrderConstants.VerifyAmtSwitchEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.MainOrderReadDAO;
 import com.huinong.truffle.payment.order.mono.dao.read.OrderReadDAO;
@@ -53,6 +55,8 @@ public class OrderService {
 	private OrderWriteDAO orderWriteDAO ;
 	@Autowired
 	private DefRedisClient defRedisClient;
+	@Autowired
+	private OrderAppConf orderAppConf ;
 
 	@Transactional
 	public BaseResult<HnpMainOrder> createOrder(HnpMainOrder mainOrder) throws Exception {
@@ -130,9 +134,12 @@ public class OrderService {
 	 * @throws Exception
 	 */
 	private BaseResult<HnpMainOrder> addOrderRecords(HnpMainOrder mainOrder) throws Exception {
-		// 3、验证子订单金额之和 是否等于 订单总金额
+		// 1是否开启验证
+		String verifySwitch = orderAppConf.getVerifyAmtSwitch();
+		boolean switchFlag = verifySwitch.equals(VerifyAmtSwitchEnum.VERIFY_AMT_OPEN.val)? true : false ;
+		// 2 验证子订单金额之和 是否等于 订单总金额
 		boolean isEqual = compareTwoAmtIsEqual(mainOrder.getData(),mainOrder.getTotalAmt().doubleValue());
-		if (!isEqual) {
+		if (switchFlag && !isEqual) {
 			logger.info("子订单金额之和不等于主订单总金额...");
 			return BaseResult.fail(OrderResultCode.DB_0019);
 		}
