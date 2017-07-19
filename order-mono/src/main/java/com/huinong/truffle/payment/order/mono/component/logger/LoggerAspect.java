@@ -47,8 +47,8 @@ public class LoggerAspect {
 		String method = pjp.getSignature().getName();
 		Class<?> clazz = pjp.getTarget().getClass();
 		Logger logger = getLogger(clazz);
-		Object [] parameters = pjp.getArgs();
-		logger.warn(clazz.getName()  +"."+method +" start invoke. parameters :" + gson.toJson(parameters == null ? new Object[]{}:parameters));
+		Object [] parameters = pjp.getArgs() == null ? new Object[]{}: pjp.getArgs();
+		logger.warn(clazz.getName()  +"."+method +" start invoke. parameters :" + gson.toJson(parameters));
 		Object result = null;
 		try {
 			result = pjp.proceed();
@@ -61,12 +61,12 @@ public class LoggerAspect {
 				if(result instanceof BaseResult){
 					BaseResult baseResult = (BaseResult)result;				
 					if(ResultCode.SUCCESS.getCode() !=  baseResult.getCode()){
-						logger.error(clazz.getName()  +"."+method +"("+gson.toJson(result)+") invoke failure. result :" + gson.toJson(result));
+						logger.error(clazz.getName()  +"."+method +"("+gson.toJson(parameters)+") invoke failure. result :" + gson.toJson(result));
 					}else{
-						logger.warn(clazz.getName() +"."+method +"("+gson.toJson(result)+") invoke finish. result :" +  gson.toJson(result) );
+						logger.warn(clazz.getName() +"."+method +"("+gson.toJson(parameters)+") invoke finish. result :" +  gson.toJson(result) );
 					}
 				}else{
-					logger.warn(clazz.getName() +"."+method +"("+gson.toJson(result)+")  invoke finish. result :" + gson.toJson(result == null ? "null": result));
+					logger.warn(clazz.getName() +"."+method +"("+gson.toJson(parameters)+")  invoke finish. result :" + gson.toJson(result == null ? "null": result));
 				}
 			}
 		}
