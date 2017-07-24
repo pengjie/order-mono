@@ -379,6 +379,7 @@ public class OrderService {
 			HnpOrderEntity orderRecord = new HnpOrderEntity();
 			orderRecord.setGroupOrderNo(mainOrderNo);
 			orderRecord.setPayState(String.valueOf(orderStatus));
+			orderRecord.setPayedTimestamp(new Date());
 			int j = orderWriteDAO.updateByMainOrderNoSelective(orderRecord);
 			if (i > 0 && j > 0) {
 				HnpMainOrder mainOrder = new HnpMainOrder();
