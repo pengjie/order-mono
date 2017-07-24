@@ -153,4 +153,21 @@ public class OrderConstants {
     		this.val = val ;
     	}
     }
+    
+    //订单来源
+    public static enum SourceFromSysEnum{
+		SYS_FROM_HNW("HNW"),SYS_FROM_HNYX("HNYX");
+		public String val ;
+		SourceFromSysEnum(String val){
+			this.val = val;
+		}
+		
+        public static boolean isDefinition(String val) {
+            for (SourceFromSysEnum type : SourceFromSysEnum.values()) {
+                if (type.val.equals(val))
+                    return true;
+            }
+            return false;
+        }
+    }
 }

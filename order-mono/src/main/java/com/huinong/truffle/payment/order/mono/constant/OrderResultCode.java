@@ -64,6 +64,7 @@ public enum OrderResultCode implements ResultCodeIntf {
 	PARAM_0032(5032,"传入的订单状态非法"),
 	PARAM_0033(5033,"传入的订单状态不在指定值范围内(PROCESSING-支付中,SUCCESS-支付成功)"),
 	PARAM_0035(5035,"无法识别[主订单号]"),
+	PARAM_0036(5036,"传入的订单来源不在指定值范围内(HNW,HNYX)"),
 	//买家收款卡信息
 	;
 

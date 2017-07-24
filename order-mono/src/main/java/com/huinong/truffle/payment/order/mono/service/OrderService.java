@@ -26,6 +26,7 @@ import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.PayResultEnum;
+import com.huinong.truffle.payment.order.mono.constant.OrderConstants.SourceFromSysEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.VerifyAmtSwitchEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.dao.read.MainOrderReadDAO;
@@ -65,6 +66,13 @@ public class OrderService {
 		}
 		if(null == mainOrder.getData()){
 			return BaseResult.fail(OrderResultCode.PARAM_0002);
+		}
+		String orderFromSystem = mainOrder.getOrderFromSystem() ;
+		if(StringUtils.isBlank(orderFromSystem)){
+			return BaseResult.fail(OrderResultCode.PARAM_0027);
+		}
+		if(!SourceFromSysEnum.isDefinition(orderFromSystem)){
+			return BaseResult.fail(OrderResultCode.PARAM_0036);
 		}
 		RedisLock lock = null;
 		try {
