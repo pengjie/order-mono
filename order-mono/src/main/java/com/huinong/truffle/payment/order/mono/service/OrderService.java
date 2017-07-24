@@ -23,6 +23,7 @@ import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
+import com.huinong.truffle.payment.order.mono.constant.OrderConstants.ClientChannelEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.OrderStateEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.PayResultEnum;
@@ -73,6 +74,13 @@ public class OrderService {
 		}
 		if(!SourceFromSysEnum.isDefinition(orderFromSystem)){
 			return BaseResult.fail(OrderResultCode.PARAM_0036);
+		}
+		String hnpChannel = mainOrder.getHnchannel() ;
+		if(StringUtils.isBlank(hnpChannel)){
+			return BaseResult.fail(OrderResultCode.PARAM_0029);
+		}
+		if(!ClientChannelEnum.isDefinition(hnpChannel)){
+			return BaseResult.fail(OrderResultCode.PARAM_0037);
 		}
 		RedisLock lock = null;
 		try {
