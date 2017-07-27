@@ -154,7 +154,7 @@ public class OrderService {
 		String verifySwitch = orderAppConf.getVerifyAmtSwitch();
 		boolean switchFlag = verifySwitch.equals(VerifyAmtSwitchEnum.VERIFY_AMT_OPEN.val)? true : false ;
 		// 2 验证子订单金额之和 是否等于 订单总金额
-		boolean isEqual = compareTwoAmtIsEqual(mainOrder.getData(),mainOrder.getTotalAmt().doubleValue());
+		boolean isEqual = compareTwoAmtIsEqual(mainOrder.getData(),mainOrder.getTotalAmt());
 		if (switchFlag && !isEqual) {
 			logger.info("子订单金额之和不等于主订单总金额...");
 			return BaseResult.fail(OrderResultCode.DB_0012);
@@ -192,9 +192,12 @@ public class OrderService {
         String serialNumber = "" ;
         HnpOrderEntity orderEntity = null ;
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
-        for(int i=0 ; i<orderItem.size();i++){
+        int size=orderItem.size();
+        int number=0;
+        for(int i=0 ; i<size;i++){
         	HnpOrder order = orderItem.get(i);
-        	serialNumber = mainOrderNo + String.format("%04d", (++i));
+        	number=i;
+        	serialNumber = mainOrderNo + String.format("%04d", (++number));
         	orderEntity = new HnpOrderEntity();
         	orderEntity.setAppId(order.getAppId());
         	orderEntity.setAmt(order.getAmt());
@@ -281,17 +284,16 @@ public class OrderService {
 	 * 比较子订单金额之和与主订单金额
 	 */
 	private boolean compareTwoAmtIsEqual(List<HnpOrder> item,
-			Double totalAmount) {
-		Double itemAmt = 0.0d;
+			BigDecimal totalAmount) {
+		BigDecimal itemAmt = BigDecimal.ZERO;
 		for (HnpOrder bean : item) {
-			itemAmt = itemAmt + bean.getAmt().doubleValue();
+			itemAmt=itemAmt.add(bean.getAmt());
 		}
 		if (null == totalAmount) {
-			totalAmount = 0.0d;
+			totalAmount = BigDecimal.ZERO;
 		}
 		return itemAmt.doubleValue() == totalAmount.doubleValue();
 	}
-
 	
 	public BaseResult<List<HnpOrder>> queryDetail(String mainOrderNo) {
 		// 0 校验参数
