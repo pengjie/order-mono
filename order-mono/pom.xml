@@ -121,6 +121,11 @@
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>${mybatis-spring-boot}</version>
 		</dependency>
+  		<dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>3.2.0</version>
+        </dependency>		
 		<dependency>
 			<artifactId>commons-dbcp</artifactId>
 			<groupId>commons-dbcp</groupId>
