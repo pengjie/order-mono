@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration status="info" packages="com.huinong.truffle.payment.order.mono.component.logger">
 	<Appenders>
-		<Console name="CONSOLE" target="system_OUT">
-			<PatternLayout charset="UTF-8" pattern="[%-5p] %d %c - %m%n" />
-		</Console>
-
-		<RollingFile name="RollingFile" fileName="/opt/logs/pay-order-mono/pay-order-mono.log" filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM}/pay-order-mono-%d{yyyy-MM-dd}-%i.log.gz">
-            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
-            <SizeBasedTriggeringPolicy size="50MB" />
+		 <Console name="CONSOLE" target="system_OUT">
+            <PatternLayout charset="UTF-8" pattern="[%-5p][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %d %c - %m%n" />
+        </Console>
+        <RollingFile name="RollingFile" fileName="/opt/logs/pay-order-mono/pay-order-mono.log"  filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM-dd}/pay-order-mono-%d{HH}.log">
+            <ThresholdFilter level="info" onMatch="ACCEPT"  onMismatch="DENY" />
+            <PatternLayout   pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %l - %msg%xEx%n" />
+            <TimeBasedTriggeringPolicy/>
         </RollingFile>
-        <RollingFile name="RollingFileError" fileName="/opt/logs/pay-order-mono/pay-order-mono_err.log" filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM}/api-server_err-%d{yyyy-MM-dd}-%i.log.gz">
-            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY" />
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level] %l - %msg%xEx%n" />
-            <SizeBasedTriggeringPolicy size="50MB" />
+        <RollingFile name="RollingFileError"  fileName="/opt/logs/pay-order-mono/pay-order-mono_err.log"  filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM-dd}/pay-order-mono_err-%d{HH}.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT"    onMismatch="DENY" />
+            <PatternLayout  pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %l - %msg%xEx%n" />
+            <TimeBasedTriggeringPolicy/>
         </RollingFile>
-        <PaymentLogAppender name="PaymentLogAppender"  >
+         <PaymentLogAppender name="PaymentLogAppender"  >
        		<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%-5p] {%F:%L} - %m%n" />
         </PaymentLogAppender>
 	</Appenders>
-
 	<Loggers>
 		<logger name="org.springframework" level="info" additivity="false">
             <appender-ref ref="CONSOLE" />
         </logger>
-		
 		<root level="DEBUG">
 			<appender-ref ref="RollingFile" />
             <appender-ref ref="RollingFileError" />
