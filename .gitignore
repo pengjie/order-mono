@@ -1,31 +1,46 @@
-# 忽略git追踪的文件
+### other ###
+target/
+bin/
+.mvn/
+Thumbs.db
+*.swp
+catalina.base_IS_UNDEFINED
+build/
+hs_err_pid*
+
+### log ###
+*.log
+*.bak
 
 
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.gradle
 
-**/target
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+*.DS_Store
 
-**/.settings
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
 
-**/.project
-
-**/.classpath
-
-**/*.iml
-
-**/.idea
-
-
-
-
-
-**/Thumbs.db
-
-**/.DS_Store
-
-**/*.swp
-
-
-
-**/catalina.base_IS_UNDEFINED
-
-/bin
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
