@@ -56,7 +56,7 @@ public class SerialGenZkImpl implements SerialGen {
     
     @Override
     public String genIntoPaySerialNo() {
-        return "HNIN" + gen();
+        return "HNPN" + gen();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class SerialGenZkImpl implements SerialGen {
 
     @Override
     public String genSettleSerialNo() {
-        return "HNST" + gen();
+        return "HNIN" + gen();
     }
 
     @Override
@@ -88,11 +88,6 @@ public class SerialGenZkImpl implements SerialGen {
     public String genRefundSerialNo() {
         return "HNRF" + gen();
     }
-    
-    @Override
-	public String genInMoneyNo() {
-    	return "HNIN" + gen();
-	}
     
     @Override
 	public String genOrderNo(Date dt) {
