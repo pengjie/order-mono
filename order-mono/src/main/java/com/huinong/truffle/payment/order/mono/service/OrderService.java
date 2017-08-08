@@ -22,6 +22,7 @@ import com.huinong.truffle.component.base.util.object.ObjectUtils;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
+import com.huinong.truffle.payment.order.mono.component.zk.SerialGenZkImpl;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.ClientChannelEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
@@ -59,6 +60,8 @@ public class OrderService {
 	private DefRedisClient defRedisClient;
 	@Autowired
 	private OrderAppConf orderAppConf ;
+    @Autowired
+    private SerialGenZkImpl serialGenZkImpl;
 
 	@Transactional
 	public BaseResult<HnpMainOrder> createOrder(HnpMainOrder mainOrder) throws Exception {
@@ -189,7 +192,11 @@ public class OrderService {
             logger.info("批量插的入参对象为空...");
             throw new Exception("批量插的入参对象为空...");
         }
-        String serialNumber = "" ;
+        //订单流水号
+        String orderSerialNumber = serialGenZkImpl.genOrderSerialNo();
+        if(StringUtils.isBlank(orderSerialNumber)){
+           orderSerialNumber = "HNOD" + (System.currentTimeMillis() * 100 + new Double( Math.random() * 100).intValue());
+        }
         HnpOrderEntity orderEntity = null ;
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
         int size=orderItem.size();
@@ -197,7 +204,7 @@ public class OrderService {
         for(int i=0 ; i<size;i++){
         	HnpOrder order = orderItem.get(i);
         	number=i;
-        	serialNumber = mainOrderNo + String.format("%04d", (++number));
+        	orderSerialNumber = orderSerialNumber + String.format("%04d", (++number));
         	orderEntity = new HnpOrderEntity();
         	orderEntity.setAppId(order.getAppId());
         	orderEntity.setAmt(order.getAmt());
@@ -215,7 +222,7 @@ public class OrderService {
         	orderEntity.setPayState(String.valueOf(OrderStateEnum.ORDER_0.val));
         	orderEntity.setShopName(order.getShopName());
         	orderEntity.setOrderFromSystem(orderFromSystem);
-        	orderEntity.setSerialNumber(serialNumber);
+        	orderEntity.setSerialNumber(orderSerialNumber);
         	orderEntity.setHash("abc");
         	orderEntity.setDeleted(DeleteState.DELETE_TYPE_T.val);
         	list.add(orderEntity);
