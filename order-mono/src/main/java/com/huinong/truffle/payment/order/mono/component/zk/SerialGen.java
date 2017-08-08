@@ -32,9 +32,6 @@ public interface SerialGen {
     //退款流水号
     public abstract String genRefundSerialNo();
     
-    //结算交易流水号
-	public abstract String genInMoneyNo();
-
 	// 中金订单号
 	public abstract String genOrderNo(Date date);
     
