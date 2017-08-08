@@ -4,33 +4,29 @@
         <Console name="CONSOLE" target="system_OUT">
             <PatternLayout charset="UTF-8" pattern="[%-5p][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %d %c - %m%n" />
         </Console>
-        <RollingFile name="RollingFile" fileName="/opt/logs/pay-order-mono/pay-order-mono.log"
-                     filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM-dd}/pay-order-mono-%d{HH}.log">
-            <ThresholdFilter level="info" onMatch="ACCEPT"
-                             onMismatch="DENY" />
-            <PatternLayout
-                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %l - %msg%xEx%n" />
+        <RollingFile name="RollingFile" fileName="/opt/logs/pay-order-mono/pay-order-mono.log"  filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM-dd}/pay-order-mono-%d{HH}.log">
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout  pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %l - %msg%xEx%n" />
             <TimeBasedTriggeringPolicy/>
         </RollingFile>
-        <RollingFile name="RollingFileError"
-                     fileName="/opt/logs/pay-order-mono/pay-order-mono_err.log"
-                     filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM-dd}/pay-order-mono_err-%d{HH}.log">
-            <ThresholdFilter level="error" onMatch="ACCEPT"
-                             onMismatch="DENY" />
-            <PatternLayout
-                    pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %l - %msg%xEx%n" />
+        <RollingFile name="RollingFileError"   fileName="/opt/logs/pay-order-mono/pay-order-mono_err.log"   filePattern="/opt/logs/pay-order-mono/$${date:yyyy-MM-dd}/pay-order-mono_err-%d{HH}.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT"    onMismatch="DENY" />
+            <PatternLayout  pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t:%r][%-5level][%X{X-B3-ParentSpanId},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-Span-Export}] %l - %msg%xEx%n" />
             <TimeBasedTriggeringPolicy/>
         </RollingFile>
         <PaymentLogAppender name="PaymentLogAppender"  >
        		<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%-5p] {%F:%L} - %m%n" />
         </PaymentLogAppender>
-    </Appenders>
-    <Loggers>
-        <asyncRoot level="info">
-            <AppenderRef ref="RollingFile" />
-            <AppenderRef ref="RollingFileError" />
-            <AppenderRef ref="CONSOLE" />
-            <AppenderRef ref="PaymentLogAppender" />
-        </asyncRoot>
-    </Loggers>
+	</Appenders>
+	<Loggers>
+		<logger name="org.springframework" level="info" additivity="false">
+            <appender-ref ref="CONSOLE" />
+        </logger>
+		<root level="DEBUG">
+			<appender-ref ref="RollingFile" />
+            <appender-ref ref="RollingFileError" />
+			<AppenderRef ref="CONSOLE" />
+			<AppenderRef ref="PaymentLogAppender" />
+		</root>
+	</Loggers>
 </configuration>
