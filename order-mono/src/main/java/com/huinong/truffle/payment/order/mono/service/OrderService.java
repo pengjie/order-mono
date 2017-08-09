@@ -22,7 +22,7 @@ import com.huinong.truffle.component.base.util.object.ObjectUtils;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
 import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
-import com.huinong.truffle.payment.order.mono.component.zk.SerialGenZkImpl;
+import com.huinong.truffle.payment.order.mono.component.zk.IDGeneratorClient;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.ClientChannelEnum;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants.DeleteState;
@@ -61,7 +61,7 @@ public class OrderService {
 	@Autowired
 	private OrderAppConf orderAppConf ;
     @Autowired
-    private SerialGenZkImpl serialGenZkImpl;
+    private IDGeneratorClient idGeneratorClient ;
 
 	@Transactional
 	public BaseResult<HnpMainOrder> createOrder(HnpMainOrder mainOrder) throws Exception {
@@ -193,7 +193,7 @@ public class OrderService {
             throw new Exception("批量插的入参对象为空...");
         }
         //订单流水号
-        String orderSerialNumber = serialGenZkImpl.genOrderSerialNo();
+        String orderSerialNumber = idGeneratorClient.genOrderSerialNo();
         if(StringUtils.isBlank(orderSerialNumber)){
            orderSerialNumber = "HNOD" + (System.currentTimeMillis() * 100 + new Double( Math.random() * 100).intValue());
         }

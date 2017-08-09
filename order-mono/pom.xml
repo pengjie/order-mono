@@ -128,21 +128,16 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
+		<dependency>
+           <groupId>org.springframework.cloud</groupId>
+           <artifactId>spring-cloud-starter-feign</artifactId>
+       </dependency>
+       		
 		<!--工程依赖jar -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.lable.oss.uniqueid</groupId>
-			<artifactId>uniqueid-core</artifactId>
-			<version>1.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.lable.oss.uniqueid</groupId>
-			<artifactId>uniqueid-zookeeper</artifactId>
-			<version>1.13</version>
-		</dependency>	
 		<dependency>
 		    <groupId>com.lmax</groupId>
 		    <artifactId>disruptor</artifactId>

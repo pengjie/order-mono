@@ -16,34 +16,10 @@ import org.springframework.context.annotation.Configuration;
 public class OrderAppConf implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-    //zk 
-    @Value("${zk.zkQuorurm}")
-    private String zkQuorurm ;
-    
-    @Value("${zk.serialGenZnode}")
-    private String serialGenZnode ;
-    
     //是否验证预支付 校验主订单支付金额和子订单金额之和
     @Value("${order.verify.prepay.amt.switch}")
     private String verifyAmtSwitch ;
     
-
-	public String getZkQuorurm() {
-		return zkQuorurm;
-	}
-
-	public void setZkQuorurm(String zkQuorurm) {
-		this.zkQuorurm = zkQuorurm;
-	}
-
-	public String getSerialGenZnode() {
-		return serialGenZnode;
-	}
-
-	public void setSerialGenZnode(String serialGenZnode) {
-		this.serialGenZnode = serialGenZnode;
-	}
-
 	public String getVerifyAmtSwitch() {
 		return verifyAmtSwitch;
 	}
@@ -52,10 +28,10 @@ public class OrderAppConf implements Serializable {
 		this.verifyAmtSwitch = verifyAmtSwitch;
 	}
 
-	@Override
+/*	@Override
 	public String toString() {
 		return "OrderAppConf [zkQuorurm=" + zkQuorurm + ", serialGenZnode="
 				+ serialGenZnode + ", verifyAmtSwitch=" + verifyAmtSwitch + "]";
-	}
+	}*/
 	
 }

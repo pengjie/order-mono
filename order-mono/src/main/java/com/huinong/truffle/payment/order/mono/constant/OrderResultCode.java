@@ -11,6 +11,7 @@ public enum OrderResultCode implements ResultCodeIntf {
 	
 	//系统异常 14301 - 14350
     SYS_0001(14301,"订单服务异常"),
+    CODE_HYSTRIX_ERROR(14302, "熔断处理"),
     
     //DB 异常 14351 - 14450
     DB_0001(14351,"订单已支付，请勿重新支付"),
