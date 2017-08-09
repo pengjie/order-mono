@@ -18,6 +18,7 @@ import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory
 import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -31,6 +32,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableAutoConfiguration
 @EnableDiscoveryClient
+@EnableFeignClients
 @EnableSwagger2
 public class OrderApplication {
 	
