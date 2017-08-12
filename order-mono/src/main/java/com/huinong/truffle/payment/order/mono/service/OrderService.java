@@ -225,10 +225,20 @@ public class OrderService {
         	orderEntity.setDeleted(DeleteState.DELETE_TYPE_T.val);
         	list.add(orderEntity);
         }
-        
-        
-        int i = orderWriteDAO.batchInsertOrder(list);
-        return i ;
+        int batchSize = 50;
+        int total = list.size();
+        int pageCount = (total / batchSize) + (total % batchSize > 0 ? 1 : 0);
+        List<HnpOrderEntity> sublist = null ;
+        for(int i = 0; i < pageCount; i++){
+          if(i < (pageCount - 1)){
+            sublist = list.subList((i * batchSize), (batchSize * ( i + 1)));
+            orderWriteDAO.batchInsertOrder(sublist);
+          }else{
+            sublist = list.subList((i * batchSize), total);
+            orderWriteDAO.batchInsertOrder(sublist);
+          }
+        }
+        return total ;
     }
 
 	/**
