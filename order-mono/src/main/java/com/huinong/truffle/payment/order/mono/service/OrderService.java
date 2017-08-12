@@ -193,7 +193,8 @@ public class OrderService {
             throw new Exception("批量插的入参对象为空...");
         }
         //订单流水号
-        String orderSerialNumber = idGeneratorClient.genOrderSerialNo();
+        String orderSerialNumber = "" ;
+        String serialNumber = idGeneratorClient.genOrderSerialNo();
         HnpOrderEntity orderEntity = null ;
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
         int size=orderItem.size();
@@ -201,7 +202,7 @@ public class OrderService {
         for(int i=0 ; i<size;i++){
         	HnpOrder order = orderItem.get(i);
         	number=i;
-        	orderSerialNumber = orderSerialNumber + String.format("%04d", (++number));
+        	orderSerialNumber = serialNumber + String.format("%04d", (++number));
         	orderEntity = new HnpOrderEntity();
         	orderEntity.setAppId(order.getAppId());
         	orderEntity.setAmt(order.getAmt());
@@ -224,6 +225,8 @@ public class OrderService {
         	orderEntity.setDeleted(DeleteState.DELETE_TYPE_T.val);
         	list.add(orderEntity);
         }
+        
+        
         int i = orderWriteDAO.batchInsertOrder(list);
         return i ;
     }
