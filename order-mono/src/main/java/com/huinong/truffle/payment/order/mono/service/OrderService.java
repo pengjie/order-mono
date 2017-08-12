@@ -194,9 +194,6 @@ public class OrderService {
         }
         //订单流水号
         String orderSerialNumber = idGeneratorClient.genOrderSerialNo();
-        if(StringUtils.isBlank(orderSerialNumber)){
-           orderSerialNumber = "HNOD" + (System.currentTimeMillis() * 100 + new Double( Math.random() * 100).intValue());
-        }
         HnpOrderEntity orderEntity = null ;
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
         int size=orderItem.size();
