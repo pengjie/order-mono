@@ -12,9 +12,22 @@ spring:
       discovery:
         enabled: true #开启通过服务来访问Config Server的功能
         service-id: api-config #指定Config Server注册的服务名
-        
   profiles:
     active: dev
+    
+  sleuth:
+    sampler:
+      percentage: 1.0  # percentage 表示采样的百分比，1.0表示百分百采样，生产建议设置为0.1
+    rxjava:
+      schedulers:
+        hook:
+         enabled: false
+  rabbitmq:
+    host: 10.10.3.67
+    port: 13001
+    username: root
+    password: rootpass123    
+    
 eureka:
   instance:
     prefer-ip-address: true
