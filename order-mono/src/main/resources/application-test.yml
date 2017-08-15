@@ -3,3 +3,17 @@ server:
   protocol: org.apache.coyote.http11.Http11AprProtocol
 logging:
   config: classpath:log4j2-test.xml
+  
+spring:
+  sleuth:
+    sampler:
+      percentage: 1.0  # percentage 表示采样的百分比，1.0表示百分百采样，生产建议设置为0.1
+    rxjava:
+     schedulers:
+      hook:
+      enabled: false
+  rabbitmq:
+    host: 10.10.3.67
+    port: 13001
+    username: root
+    password: rootpass123  
