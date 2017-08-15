@@ -45,7 +45,7 @@ public class IDGeneratorClient {
         idVal = idResult.getData() + "" ;
       }
     } catch (Exception e) {
-      logger.info("调用发报器,生成ID异常:"+e);
+      logger.error("调用发报器,生成ID异常:"+e);
       e.printStackTrace();
     }
     if(StringUtils.isBlank(idVal)){
