@@ -310,7 +310,8 @@ public class OrderService {
 		if (null == totalAmount) {
 			totalAmount = BigDecimal.ZERO;
 		}
-		return itemAmt.doubleValue() == totalAmount.doubleValue();
+		return itemAmt.setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue() ==totalAmount.setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue() ;
+		/*return itemAmt.doubleValue() == totalAmount.doubleValue();*/
 	}
 	
 	public BaseResult<List<HnpOrder>> queryDetail(String mainOrderNo) {
