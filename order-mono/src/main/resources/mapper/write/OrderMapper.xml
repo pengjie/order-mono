@@ -22,7 +22,7 @@
     values (#{orderId,jdbcType=VARCHAR}, #{appId,jdbcType=INTEGER}, 
       #{orderFromSystem,jdbcType=VARCHAR}, #{orderSummary,jdbcType=VARCHAR}, #{outUid,jdbcType=BIGINT}, 
       #{inUid,jdbcType=BIGINT}, #{amt,jdbcType=DECIMAL}, #{needPay,jdbcType=DECIMAL}, 
-      #{sysOffAmt,jdbcType=DECIMAL}, #{payOffAmt,jdbcType=DECIMAL}, #{orderTimestamp,jdbcType=TIMESTAMP}, 
+      #{sysOffAmt,jdbcType=DECIMAL}, #{payOffAmt,jdbcType=DECIMAL}, now(), 
       #{payState,jdbcType=CHAR}, #{deleted,jdbcType=BIT}, #{hash,jdbcType=VARCHAR}, #{refundState,jdbcType=CHAR}, 
       #{payedTimestamp,jdbcType=TIMESTAMP}, #{finishedTimestamp,jdbcType=TIMESTAMP}, 
       #{closedTimestamp,jdbcType=TIMESTAMP}, #{refundTimestamp,jdbcType=TIMESTAMP}, #{groupOrderNo,jdbcType=VARCHAR}, 
@@ -53,7 +53,7 @@
       		#{item.outUid,jdbcType=BIGINT},#{item.inUid,jdbcType=BIGINT}, 
       		#{item.amt,jdbcType=DECIMAL}, #{item.needPay,jdbcType=DECIMAL}, 
       		#{item.sysOffAmt,jdbcType=DECIMAL}, #{item.payOffAmt,jdbcType=DECIMAL}, 
-      		#{item.orderTimestamp,jdbcType=TIMESTAMP},#{item.payState,jdbcType=CHAR}, 
+      		now(),#{item.payState,jdbcType=CHAR}, 
       		#{item.deleted,jdbcType=BIT}, #{item.hash,jdbcType=VARCHAR}, 
       		#{item.refundState,jdbcType=CHAR}, #{item.payedTimestamp,jdbcType=TIMESTAMP}, 
       		#{item.finishedTimestamp,jdbcType=TIMESTAMP},#{item.closedTimestamp,jdbcType=TIMESTAMP}, 
@@ -100,7 +100,7 @@
         pay_off_amt = #{payOffAmt,jdbcType=DECIMAL},
       </if>
       <if test="orderTimestamp != null" >
-        order_timestamp = #{orderTimestamp,jdbcType=TIMESTAMP},
+        order_timestamp = now(),
       </if>
       <if test="payState != null" >
         pay_state = #{payState,jdbcType=CHAR},
@@ -115,16 +115,16 @@
         refund_state = #{refundState,jdbcType=CHAR},
       </if>
       <if test="payedTimestamp != null" >
-        payed_timestamp = #{payedTimestamp,jdbcType=TIMESTAMP},
+        payed_timestamp = now(),
       </if>
       <if test="finishedTimestamp != null" >
-        finished_timestamp = #{finishedTimestamp,jdbcType=TIMESTAMP},
+        finished_timestamp = now(),
       </if>
       <if test="closedTimestamp != null" >
-        closed_timestamp = #{closedTimestamp,jdbcType=TIMESTAMP},
+        closed_timestamp = now(),
       </if>
       <if test="refundTimestamp != null" >
-        refund_timestamp = #{refundTimestamp,jdbcType=TIMESTAMP},
+        refund_timestamp = now(),
       </if>
       <if test="groupOrderNo != null" >
         group_order_no = #{groupOrderNo,jdbcType=VARCHAR},
@@ -180,7 +180,7 @@
         pay_off_amt = #{payOffAmt,jdbcType=DECIMAL},
       </if>
       <if test="orderTimestamp != null" >
-        order_timestamp = #{orderTimestamp,jdbcType=TIMESTAMP},
+        order_timestamp = now(),
       </if>
       <if test="payState != null" >
         pay_state = #{payState,jdbcType=CHAR},
@@ -195,16 +195,16 @@
         refund_state = #{refundState,jdbcType=CHAR},
       </if>
       <if test="payedTimestamp != null" >
-        payed_timestamp = #{payedTimestamp,jdbcType=TIMESTAMP},
+        payed_timestamp = now(),
       </if>
       <if test="finishedTimestamp != null" >
-        finished_timestamp = #{finishedTimestamp,jdbcType=TIMESTAMP},
+        finished_timestamp = now(),
       </if>
       <if test="closedTimestamp != null" >
-        closed_timestamp = #{closedTimestamp,jdbcType=TIMESTAMP},
+        closed_timestamp = now(),
       </if>
       <if test="refundTimestamp != null" >
-        refund_timestamp = #{refundTimestamp,jdbcType=TIMESTAMP},
+        refund_timestamp = now(),
       </if>
       <if test="groupOrderNo != null" >
         group_order_no = #{groupOrderNo,jdbcType=VARCHAR},
@@ -260,7 +260,7 @@
         pay_off_amt = #{payOffAmt,jdbcType=DECIMAL},
       </if>
       <if test="orderTimestamp != null" >
-        order_timestamp = #{orderTimestamp,jdbcType=TIMESTAMP},
+        order_timestamp = now(),
       </if>
       <if test="payState != null" >
         pay_state = #{payState,jdbcType=CHAR},
@@ -275,16 +275,16 @@
         refund_state = #{refundState,jdbcType=CHAR},
       </if>
       <if test="payedTimestamp != null" >
-        payed_timestamp = #{payedTimestamp,jdbcType=TIMESTAMP},
+        payed_timestamp = now(),
       </if>
       <if test="finishedTimestamp != null" >
-        finished_timestamp = #{finishedTimestamp,jdbcType=TIMESTAMP},
+        finished_timestamp = now(),
       </if>
       <if test="closedTimestamp != null" >
-        closed_timestamp = #{closedTimestamp,jdbcType=TIMESTAMP},
+        closed_timestamp = now(),
       </if>
       <if test="refundTimestamp != null" >
-        refund_timestamp = #{refundTimestamp,jdbcType=TIMESTAMP},
+        refund_timestamp = now(),
       </if>
       <if test="groupOrderNo != null" >
         group_order_no = #{groupOrderNo,jdbcType=VARCHAR},

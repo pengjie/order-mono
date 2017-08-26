@@ -57,6 +57,7 @@ public class OrderController extends BaseController{
 	    	return result;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("预支付创建订单异常:"+e);
 			return BaseResult.fail(OrderResultCode.SYS_0001);
 		}
 	}
@@ -118,6 +119,7 @@ public class OrderController extends BaseController{
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("完结订单异常:"+e);
 			return BaseResult.fail(OrderResultCode.SYS_0001);
 		}
     }

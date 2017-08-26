@@ -119,7 +119,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.info("创建订单异常："+e);
+			logger.error("创建订单异常："+e);
 			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
@@ -193,10 +193,8 @@ public class OrderService {
             throw new Exception("批量插的入参对象为空...");
         }
         //订单流水号
-        String orderSerialNumber = idGeneratorClient.genOrderSerialNo();
-        if(StringUtils.isBlank(orderSerialNumber)){
-           orderSerialNumber = "HNOD" + (System.currentTimeMillis() * 100 + new Double( Math.random() * 100).intValue());
-        }
+        String orderSerialNumber = "" ;
+        String serialNumber = idGeneratorClient.genOrderSerialNo();
         HnpOrderEntity orderEntity = null ;
         List<HnpOrderEntity> list = new ArrayList<HnpOrderEntity>();
         int size=orderItem.size();
@@ -204,7 +202,7 @@ public class OrderService {
         for(int i=0 ; i<size;i++){
         	HnpOrder order = orderItem.get(i);
         	number=i;
-        	orderSerialNumber = orderSerialNumber + String.format("%04d", (++number));
+        	orderSerialNumber = serialNumber + String.format("%04d", (++number));
         	orderEntity = new HnpOrderEntity();
         	orderEntity.setAppId(order.getAppId());
         	orderEntity.setAmt(order.getAmt());
@@ -227,8 +225,20 @@ public class OrderService {
         	orderEntity.setDeleted(DeleteState.DELETE_TYPE_T.val);
         	list.add(orderEntity);
         }
-        int i = orderWriteDAO.batchInsertOrder(list);
-        return i ;
+        int batchSize = 50;
+        int total = list.size();
+        int pageCount = (total / batchSize) + (total % batchSize > 0 ? 1 : 0);
+        List<HnpOrderEntity> sublist = null ;
+        for(int i = 0; i < pageCount; i++){
+          if(i < (pageCount - 1)){
+            sublist = list.subList((i * batchSize), (batchSize * ( i + 1)));
+            orderWriteDAO.batchInsertOrder(sublist);
+          }else{
+            sublist = list.subList((i * batchSize), total);
+            orderWriteDAO.batchInsertOrder(sublist);
+          }
+        }
+        return total ;
     }
 
 	/**
@@ -283,6 +293,7 @@ public class OrderService {
 			return BaseResult.success(result);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("查询主订单异常:"+e);
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 	}
@@ -299,7 +310,8 @@ public class OrderService {
 		if (null == totalAmount) {
 			totalAmount = BigDecimal.ZERO;
 		}
-		return itemAmt.doubleValue() == totalAmount.doubleValue();
+		return itemAmt.setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue() ==totalAmount.setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue() ;
+		/*return itemAmt.doubleValue() == totalAmount.doubleValue();*/
 	}
 	
 	public BaseResult<List<HnpOrder>> queryDetail(String mainOrderNo) {
@@ -322,6 +334,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("查询订单明细异常:"+e);
 			return  BaseResult.fail(OrderResultCode.DB_0014);
 		}
 		return BaseResult.success(returnList);
@@ -416,6 +429,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("完结订单异常:"+e);
 			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
@@ -446,6 +460,7 @@ public class OrderService {
 			return BaseResult.success(returnbean);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("查询订单流水信息异常:"+e);
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 	}
@@ -499,6 +514,7 @@ public class OrderService {
             return new BaseResult<PageValue<HnpOrder>>(orderValue);
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("查询分页订单列表异常:"+e);
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 	}

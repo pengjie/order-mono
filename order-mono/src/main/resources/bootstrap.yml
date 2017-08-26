@@ -12,9 +12,9 @@ spring:
       discovery:
         enabled: true #开启通过服务来访问Config Server的功能
         service-id: api-config #指定Config Server注册的服务名
-        
   profiles:
     active: dev
+    
 eureka:
   instance:
     prefer-ip-address: true
