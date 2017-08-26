@@ -119,7 +119,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("创建订单异常："+e);
+			logger.error("创建订单异常",e);
 			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
@@ -293,7 +293,7 @@ public class OrderService {
 			return BaseResult.success(result);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("查询主订单异常:"+e);
+			logger.error("查询主订单异常",e);
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 	}
@@ -334,7 +334,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("查询订单明细异常:"+e);
+			logger.error("查询订单明细异常",e);
 			return  BaseResult.fail(OrderResultCode.DB_0014);
 		}
 		return BaseResult.success(returnList);
@@ -429,7 +429,7 @@ public class OrderService {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("完结订单异常:"+e);
+			logger.error("完结订单异常",e);
 			throw new RuntimeException(e);
 		} finally {
 			if (lock != null) {
@@ -460,7 +460,7 @@ public class OrderService {
 			return BaseResult.success(returnbean);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("查询订单流水信息异常:"+e);
+			logger.error("查询订单流水信息异常",e);
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 	}
@@ -514,7 +514,7 @@ public class OrderService {
             return new BaseResult<PageValue<HnpOrder>>(orderValue);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("查询分页订单列表异常:"+e);
+			logger.error("查询分页订单列表异常",e);
 			return BaseResult.fail(OrderResultCode.DB_0014);
 		}
 	}
