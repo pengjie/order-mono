@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.huinong.truffle.component.base.constants.BaseResult;
-import com.huinong.truffle.component.base.constants.PageValue;
-import com.huinong.truffle.component.base.constants.ResultCode;
-import com.huinong.truffle.component.base.util.object.ObjectUtils;
+import com.huinong.framework.autoconfigure.mybatis.MybatisPageValue;
+import com.huinong.framework.autoconfigure.web.BaseResult;
+import com.huinong.framework.autoconfigure.web.ResultCode;
 import com.huinong.truffle.payment.order.mono.component.redis.RedisLock;
-import com.huinong.truffle.payment.order.mono.component.redis.client.DefRedisClient;
 import com.huinong.truffle.payment.order.mono.component.sys.config.OrderAppConf;
 import com.huinong.truffle.payment.order.mono.component.zk.IDGeneratorClient;
 import com.huinong.truffle.payment.order.mono.constant.OrderConstants;
@@ -41,6 +40,8 @@ import com.huinong.truffle.payment.order.mono.domain.OrderQuery;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 
+import redis.clients.jedis.JedisCluster;
+
 @Service("orderService")
 public class OrderService {
 
@@ -56,43 +57,47 @@ public class OrderService {
 	private OrderReadDAO orderReadDAO ;
 	@Autowired
 	private OrderWriteDAO orderWriteDAO ;
+//	@Autowired
+//	private DefRedisClient defRedisClient;
+	
 	@Autowired
-	private DefRedisClient defRedisClient;
+	private JedisCluster jedisCluster;
+	
 	@Autowired
 	private OrderAppConf orderAppConf ;
     @Autowired
     private IDGeneratorClient idGeneratorClient ;
 
-	@Transactional
+    @Transactional(value = "writeNodeTx")
 	public BaseResult<HnpMainOrder> createOrder(HnpMainOrder mainOrder) throws Exception {
 		if (null == mainOrder) {
-			return BaseResult.fail(OrderResultCode.PARAM_0002);
+			return BaseResult.fail(OrderResultCode.PARAM_0002.getCode(),OrderResultCode.PARAM_0002.getMsg());
 		}
 		if(null == mainOrder.getData()){
-			return BaseResult.fail(OrderResultCode.PARAM_0001);
+			return BaseResult.fail(OrderResultCode.PARAM_0001.getCode(),OrderResultCode.PARAM_0001.getMsg());
 		}
 		String orderFromSystem = mainOrder.getOrderFromSystem() ;
 		if(StringUtils.isBlank(orderFromSystem)){
-			return BaseResult.fail(OrderResultCode.PARAM_0017);
+			return BaseResult.fail(OrderResultCode.PARAM_0017.getCode(),OrderResultCode.PARAM_0017.getMsg());
 		}
 		if(!SourceFromSysEnum.isDefinition(orderFromSystem)){
-			return BaseResult.fail(OrderResultCode.PARAM_0025);
+			return BaseResult.fail(OrderResultCode.PARAM_0025.getCode(),OrderResultCode.PARAM_0025.getMsg());
 		}
 		String hnpChannel = mainOrder.getHnchannel() ;
 		if(StringUtils.isBlank(hnpChannel)){
-			return BaseResult.fail(OrderResultCode.PARAM_0019);
+			return BaseResult.fail(OrderResultCode.PARAM_0019.getCode(),OrderResultCode.PARAM_0019.getMsg());
 		}
 		if(!ClientChannelEnum.isDefinition(hnpChannel)){
-			return BaseResult.fail(OrderResultCode.PARAM_0026);
+			return BaseResult.fail(OrderResultCode.PARAM_0026.getCode(),OrderResultCode.PARAM_0026.getMsg());
 		}
 		RedisLock lock = null;
 		try {
 			// 0 对每一笔预支付订单进行锁处理，防止重复提交
 			String mainOrderNo = mainOrder.getMainOrderNo();
-			lock = new RedisLock(defRedisClient,OrderConstants.RedisKey.ORDER_REPAY_KEY.value.concat(mainOrderNo));
+			lock = new RedisLock(jedisCluster,OrderConstants.RedisKey.ORDER_REPAY_KEY.value.concat(mainOrderNo));
 			if (!lock.lock()) {
 				logger.info("订单：" + mainOrderNo + "预支付超时...");
-				return BaseResult.fail(OrderResultCode.DB_0013);
+				return BaseResult.fail(OrderResultCode.DB_0013.getCode(),OrderResultCode.DB_0013.getMsg());
 			}
 			// 1 检测
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
@@ -100,13 +105,13 @@ public class OrderService {
 				// 判断订单状态
 				if (!mainOrderEntity.isWaitingConfirm()) {
 					logger.info("订单：" + mainOrderNo + "已支付，请勿重新支付");
-					return BaseResult.fail(OrderResultCode.DB_0001);
+					return BaseResult.fail(OrderResultCode.DB_0001.getCode(),OrderResultCode.DB_0001.getMsg());
 				}
 				// 重新预支付订单在订单存在情况下需要确认订单数据是否一致
 				if(mainOrderEntity.getMsgUUID().equals(mainOrder.genObjectUUID())){
 					//数据一致 直接返回订单信息
 					HnpMainOrder returnbean = new HnpMainOrder();
-					ObjectUtils.mergeProperties(returnbean, mainOrderEntity);
+					BeanUtils.copyProperties(mainOrderEntity, returnbean);
 					return BaseResult.success(returnbean);
 				}else{
 					// 删除以前的主订单和明细数据 加入新的订单信息
@@ -160,7 +165,7 @@ public class OrderService {
 		boolean isEqual = compareTwoAmtIsEqual(mainOrder.getData(),mainOrder.getTotalAmt());
 		if (switchFlag && !isEqual) {
 			logger.info("子订单金额之和不等于主订单总金额...");
-			return BaseResult.fail(OrderResultCode.DB_0012);
+			return BaseResult.fail(OrderResultCode.DB_0012.getCode(),OrderResultCode.DB_0012.getMsg());
 		}
 		HnpMainOrderEntity record = new HnpMainOrderEntity();
 		record.setCreateTime(new Date());
@@ -176,11 +181,12 @@ public class OrderService {
 		int i = mainOrderWriteDAO.insert(record);
 		if(i <= 0){
 			logger.info("添加订单信息失败"); 
-			return BaseResult.fail(OrderResultCode.DB_0010);
+			return BaseResult.fail(OrderResultCode.DB_0010.getCode(),OrderResultCode.DB_0010.getMsg());
 		}
 		addBatchItem(mainOrder.getData(),mainOrder.getMainOrderNo(),mainOrder.getOrderFromSystem());
 		HnpMainOrder result = new HnpMainOrder();
-		ObjectUtils.mergeProperties(result, record);
+		BeanUtils.copyProperties(record, result);
+		
 		return BaseResult.success(result);
 	}
 	
@@ -247,32 +253,32 @@ public class OrderService {
 	private BaseResult<Void> checkReqMsg(HnpMainOrder mainOrder) {
 		if (StringUtils.isBlank(mainOrder.getOrderFromSystem())){
 			logger.info("订单确认失败,平台来源为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0017);
+			return BaseResult.fail(OrderResultCode.PARAM_0017.getCode(),OrderResultCode.PARAM_0017.getMsg());
 		}
 
 		if (StringUtils.isBlank(mainOrder.getMainOrderNo())){
 			logger.info("订单确认失败,主订单号为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0003);
+			return BaseResult.fail(OrderResultCode.PARAM_0003.getCode(), OrderResultCode.PARAM_0003.getMsg());
 		}
 
 		if (null == mainOrder.getTotalAmt()){
 			logger.info("订单确认失败,订单金额为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0005);
+			return BaseResult.fail(OrderResultCode.PARAM_0005.getCode(),OrderResultCode.PARAM_0005.getMsg());
 		}
 
 		if (null == mainOrder.getOutUid()){
 			logger.info("订单确认失败,买家账号为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0018);
+			return BaseResult.fail(OrderResultCode.PARAM_0018.getCode(),OrderResultCode.PARAM_0018.getMsg());
 		}
 
 		if (StringUtils.isBlank(mainOrder.getHnchannel())){
 			logger.info("订单确认失败,下单渠道为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0019);
+			return BaseResult.fail(OrderResultCode.PARAM_0019.getCode(),OrderResultCode.PARAM_0019.getMsg());
 		}
 
 		if (null == mainOrder.getData() || mainOrder.getData().size() == 0){
 			logger.info("订单确认失败,订单明细为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0019);
+			return BaseResult.fail(OrderResultCode.PARAM_0019.getCode(),OrderResultCode.PARAM_0019.getMsg());
 		}
 		return BaseResult.success();
 	}
@@ -280,21 +286,21 @@ public class OrderService {
 	public BaseResult<HnpMainOrder> queryMainOrder(String mainOrderNo) {
 		if(StringUtils.isBlank(mainOrderNo)){
 			logger.info("无法识别{主订单编号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0003);
+			return BaseResult.fail(OrderResultCode.PARAM_0003.getCode(),OrderResultCode.PARAM_0003.getMsg());
 		}
 		try {
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
 			if (null == mainOrderEntity) {
 				logger.info("参数异常：主订单信息为空");
-				return BaseResult.fail(OrderResultCode.DB_0016);
+				return BaseResult.fail(OrderResultCode.DB_0016.getCode(),OrderResultCode.DB_0016.getMsg());
 			}
 			HnpMainOrder result = new HnpMainOrder();
-			ObjectUtils.mergeProperties(result, mainOrderEntity);
+			BeanUtils.copyProperties(mainOrderEntity, result);
 			return BaseResult.success(result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("查询主订单异常",e);
-			return BaseResult.fail(OrderResultCode.DB_0014);
+			return BaseResult.fail(OrderResultCode.DB_0014.getCode(),OrderResultCode.DB_0014.getMsg());
 		}
 	}
 
@@ -318,7 +324,7 @@ public class OrderService {
 		// 0 校验参数
 		if (StringUtils.isBlank(mainOrderNo)) {
 			logger.info("查询订单参数{主订单号}为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0002);
+			return BaseResult.fail(OrderResultCode.PARAM_0002.getCode(),OrderResultCode.PARAM_0002.getMsg());
 		}
 		List<HnpOrderEntity> orderlist = orderReadDAO.listByMainOrderNo(mainOrderNo);
 		if (null == orderlist || orderlist.size() == 0) {
@@ -329,13 +335,13 @@ public class OrderService {
 			HnpOrder returnbean = null ;
 			for(HnpOrderEntity entity : orderlist){
 				returnbean = new HnpOrder();
-				ObjectUtils.mergeProperties(returnbean, entity);
+				BeanUtils.copyProperties(entity, returnbean);
 				returnList.add(returnbean);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("查询订单明细异常",e);
-			return  BaseResult.fail(OrderResultCode.DB_0014);
+			return  BaseResult.fail(OrderResultCode.DB_0014.getCode(),OrderResultCode.DB_0014.getMsg());
 		}
 		return BaseResult.success(returnList);
 	}
@@ -376,20 +382,20 @@ public class OrderService {
 		}
 	}*/
 
-	@Transactional
+	 @Transactional(value = "writeNodeTx")
 	public BaseResult<HnpMainOrder> finishOrder(String mainOrderNo,String payStatus) throws Exception {
 		if (StringUtils.isBlank(mainOrderNo)) {
 			logger.info("参数{订单号}为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0002);
+			return BaseResult.fail(OrderResultCode.PARAM_0002.getCode(),OrderResultCode.PARAM_0002.getMsg());
 		}
 		if (StringUtils.isBlank(payStatus)) {
 			logger.info("参数{订单状态}为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0002);
+			return BaseResult.fail(OrderResultCode.PARAM_0002.getCode(),OrderResultCode.PARAM_0002.getMsg());
 		}
 		
 		if(!PayResultEnum.isDefinition(payStatus)){
 			logger.info("参数{订单状态}不在自定值范围内(PROCESSING-支付中,SUCCESS-支付成功)");
-			return BaseResult.fail(OrderResultCode.PARAM_0023);
+			return BaseResult.fail(OrderResultCode.PARAM_0023.getCode(),OrderResultCode.PARAM_0023.getMsg());
 		}
 		
 		//订单状态
@@ -397,16 +403,16 @@ public class OrderService {
 		RedisLock lock = null;
 		try {
 			// 0 对每一笔预支付订单进行锁处理，防止重复提交
-			lock = new RedisLock(defRedisClient,OrderConstants.RedisKey.ORDER_FINISH_KEY.value.concat(mainOrderNo));
+			lock = new RedisLock(jedisCluster,OrderConstants.RedisKey.ORDER_FINISH_KEY.value.concat(mainOrderNo));
 			if (!lock.lock()) {
 				logger.info("订单：" + mainOrderNo + "更新状态超时");		
-				return BaseResult.fail(OrderResultCode.DB_0013);
+				return BaseResult.fail(OrderResultCode.DB_0013.getCode(),OrderResultCode.DB_0013.getMsg());
 			}
 			
 			HnpMainOrderEntity mainOrderEntity = mainOrderReadDAO.selectByMainOrderNo(mainOrderNo);
 			if(null == mainOrderEntity){
 				logger.info("订单：" + mainOrderNo + "检索订单结果为空");
-				return BaseResult.fail(OrderResultCode.DB_0016);
+				return BaseResult.fail(OrderResultCode.DB_0016.getCode(),OrderResultCode.DB_0016.getMsg());
 			}
 			
 			HnpMainOrderEntity mainRecord = new HnpMainOrderEntity();
@@ -421,7 +427,7 @@ public class OrderService {
 			int j = orderWriteDAO.updateByMainOrderNoSelective(orderRecord);
 			if (i > 0 && j > 0) {
 				HnpMainOrder mainOrder = new HnpMainOrder();
-				ObjectUtils.mergeProperties(mainOrder, mainOrderEntity);
+				BeanUtils.copyProperties(mainOrderEntity, mainOrder);
 				return BaseResult.success(mainOrder);
 			} else {
 				logger.info("更新订单状态失败");
@@ -447,21 +453,21 @@ public class OrderService {
 		// 0 校验参数
 		if (StringUtils.isBlank(serialNumber)) {
 			logger.info("查询订单参数{子订单流水号}为空");
-			return BaseResult.fail(OrderResultCode.PARAM_0002);
+			return BaseResult.fail(OrderResultCode.PARAM_0002.getCode(),OrderResultCode.PARAM_0002.getMsg());
 		}
 		try {
 			HnpOrderEntity orderEntity = orderReadDAO.selectBySerialNumber(serialNumber);
 			if (null == orderEntity) {
 				logger.info("检索订单结果为空");
-				return BaseResult.fail(OrderResultCode.DB_0004);
+				return BaseResult.fail(OrderResultCode.DB_0004.getCode(),OrderResultCode.DB_0004.getMsg());
 			}
 			HnpOrder returnbean = new HnpOrder();
-			ObjectUtils.mergeProperties(returnbean, orderEntity);
+			BeanUtils.copyProperties(orderEntity, returnbean);
 			return BaseResult.success(returnbean);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("查询订单流水信息异常",e);
-			return BaseResult.fail(OrderResultCode.DB_0014);
+			return BaseResult.fail(OrderResultCode.DB_0014.getCode(),OrderResultCode.DB_0014.getMsg());
 		}
 	}
 	
@@ -474,16 +480,16 @@ public class OrderService {
 	public BaseResult<Void> updateHnpDetailBySerialNumber(String serialNumber,Integer state) {
 		if(StringUtils.isBlank(serialNumber)){
 			logger.info("无法识别{订单流水号}");
-			return BaseResult.fail(OrderResultCode.PARAM_0020);
+			return BaseResult.fail(OrderResultCode.PARAM_0020.getCode(),OrderResultCode.PARAM_0020.getMsg());
 		}
 		if(null == state){
 			logger.info("无法识别{订单状态}");
-			return BaseResult.fail(OrderResultCode.PARAM_0021);
+			return BaseResult.fail(OrderResultCode.PARAM_0021.getCode(),OrderResultCode.PARAM_0021.getMsg());
 		}
 		
 		if(!OrderStateEnum.isDefinition(state)){
 			logger.info("无法识别{订单状态}");
-			return BaseResult.fail(OrderResultCode.PARAM_0022);
+			return BaseResult.fail(OrderResultCode.PARAM_0022.getCode(),OrderResultCode.PARAM_0022.getMsg());
 		}
 		
 		HnpOrderEntity record = new HnpOrderEntity();
@@ -493,7 +499,7 @@ public class OrderService {
 		int i = orderWriteDAO.updateBySerialNumberSelective(record);
 		if(i <= 0){
 			logger.info("更新订单状态失败");
-			return BaseResult.fail(OrderResultCode.DB_0017);
+			return BaseResult.fail(OrderResultCode.DB_0017.getCode(),OrderResultCode.DB_0017.getMsg());
 		}
 		return BaseResult.success();
 	}
@@ -503,19 +509,25 @@ public class OrderService {
 	 * @param query
 	 * @return
 	 */
-	public BaseResult<PageValue<HnpOrder>> queryPageOrderData(OrderQuery query){
+	public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(OrderQuery query){
 		try {
 			Integer pageNum = query.getPageNum() == null?1:query.getPageNum() ;
             Integer pageSize = query.getPageSize() == null?10: query.getPageSize();
             PageHelper.startPage(pageNum, pageSize);
             List<HnpOrderEntity> orderlist = orderReadDAO.listBySelective(query);
-            PageValue<HnpOrderEntity> orderEntity = new PageValue<HnpOrderEntity>(orderlist);
-            PageValue<HnpOrder> orderValue = ObjectUtils.transfer(orderEntity);
-            return new BaseResult<PageValue<HnpOrder>>(orderValue);
+            MybatisPageValue<HnpOrder> orderValue =  new MybatisPageValue<>();
+            List<HnpOrder> orders = new ArrayList<>();
+            for(HnpOrderEntity entity : orderlist){
+            	HnpOrder hnpOrder = new HnpOrder();
+            	BeanUtils.copyProperties(entity, hnpOrder);
+            	orders.add(hnpOrder);
+            }
+            orderValue.setList(orders);
+            return new BaseResult<MybatisPageValue<HnpOrder>>(orderValue);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("查询分页订单列表异常",e);
-			return BaseResult.fail(OrderResultCode.DB_0014);
+			return BaseResult.fail(OrderResultCode.DB_0014.getCode(),OrderResultCode.DB_0014.getMsg());
 		}
 	}
 	

@@ -1,147 +1,40 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.huinong.truffle</groupId>
-		<artifactId>backend</artifactId>
-		<version>1.1.0</version>
-		<relativePath />
-	</parent>
+    <groupId>com.huinong.truffle</groupId>
 	<artifactId>order-mono</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Payment Order Server</name>
 	<description>支付系统-订单服务</description>
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
+		  <groupId>com.huinong.truffle</groupId>
+		  <artifactId>hn-framework-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
+		    <groupId>com.huinong.truffle</groupId>
+		    <artifactId>hn-framework-starter-logback</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
+		  <groupId>com.huinong.truffle</groupId>
+		  <artifactId>hn-framework-starter-redis</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-eureka</artifactId>
+		  <groupId>com.huinong.truffle</groupId>
+		  <artifactId>hn-framework-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-redis</artifactId>
+		  <groupId>com.huinong.truffle</groupId>
+		  <artifactId>hn-framework-starter-okhttp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfox-swagger2.version}</version>
+		  <groupId>com.huinong.truffle</groupId>
+		  <artifactId>hn-framework-starter-mybatis</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox-swagger2.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-config</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.huinong.truffle</groupId>
-			<artifactId>component</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
-			<classifier>base</classifier>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.cloud</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.huinong.truffle</groupId>
-			<artifactId>component</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<classifier>redis</classifier>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.cloud</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.huinong.truffle</groupId>
-			<artifactId>component</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<classifier>mybatis</classifier>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.cloud</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis.spring.boot</groupId>
-			<artifactId>mybatis-spring-boot-starter</artifactId>
-			<version>${mybatis-spring-boot}</version>
-		</dependency>
-  		<dependency>
-            <groupId>com.lmax</groupId>
-            <artifactId>disruptor</artifactId>
-            <version>3.2.0</version>
-        </dependency>		
-		<dependency>
-			<artifactId>commons-dbcp</artifactId>
-			<groupId>commons-dbcp</groupId>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-		<dependency>
-           <groupId>org.springframework.cloud</groupId>
-           <artifactId>spring-cloud-starter-feign</artifactId>
-       </dependency>
-       		
 		<!--工程依赖jar -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>com.lmax</groupId>
-		    <artifactId>disruptor</artifactId>
-		    <version>3.2.0</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -150,7 +43,54 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			 <plugin>    
+		        <groupId>org.apache.maven.plugins</groupId>    
+		        <artifactId>maven-compiler-plugin</artifactId>    
+		        <version>3.3</version>    
+		        <configuration>    
+		            <source>1.8</source>    
+		            <target>1.8</target>    
+		        </configuration>    
+		        <dependencies>    
+		            <dependency>    
+		                <groupId>org.codehaus.plexus</groupId>    
+		                <artifactId>plexus-compiler-eclipse</artifactId>    
+		                <version>2.2</version>    
+		            </dependency>    
+		        </dependencies>    
+		       </plugin>
+		        <plugin>    
+	             <groupId>org.springframework.boot</groupId>
+		          <artifactId>spring-boot-maven-plugin</artifactId>
+		          <executions>    
+		              <execution>    
+		                  <goals>    
+		                      <goal>repackage</goal>    
+		                  </goals>    
+		              </execution>    
+		          </executions>    
+		      </plugin>    
 		</plugins>
 		<finalName>payment-order-mono</finalName>
 	</build>
+	
+	 <repositories>
+	    <repository>
+	      <id>huinong</id>
+	      <name>Nexus HuiNong Repository</name>
+	      <url>http://10.10.1.42:8081/nexus/content/groups/public/</url>
+	    </repository>
+	  </repositories>
+	  <dependencyManagement>
+	    <dependencies>
+	      <dependency>
+	        <groupId>com.huinong.truffle</groupId>
+	        <artifactId>hn-framework-dependencies</artifactId>
+	        <!-- 框架版本号, 框架升级仅仅修改这个版本号 -->
+	        <version>0.3.0-SNAPSHOT</version>  
+	        <type>pom</type>
+	        <scope>import</scope>
+	      </dependency>
+	    </dependencies>
+	  </dependencyManagement>
 </project>

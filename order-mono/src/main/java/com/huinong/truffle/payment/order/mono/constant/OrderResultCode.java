@@ -1,13 +1,11 @@
 package com.huinong.truffle.payment.order.mono.constant;
 
-import com.huinong.truffle.component.base.constants.ResultCodeIntf;
-
 /**
  * 订单返回错误信息
  * @author peng
  *
  */
-public enum OrderResultCode implements ResultCodeIntf {
+public enum OrderResultCode {
 	
 	//系统异常 14301 - 14350
     SYS_0001(14301,"订单服务状态异常"),

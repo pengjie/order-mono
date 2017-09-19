@@ -5,10 +5,9 @@ package com.huinong.truffle.payment.order.mono.invoke.feign;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.huinong.truffle.component.base.constants.BaseResult;
+import com.huinong.framework.autoconfigure.web.BaseResult;
 import com.huinong.truffle.payment.order.mono.invoke.feign.fallover.SequencerFeignClientHystrixFactory;
 
 /**

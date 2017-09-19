@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.huinong.truffle.component.base.constants.BaseResult;
-import com.huinong.truffle.component.base.constants.ResultCode;
+import com.huinong.framework.autoconfigure.web.BaseResult;
+import com.huinong.framework.autoconfigure.web.ResultCode;
 import com.huinong.truffle.payment.order.mono.invoke.feign.SequencerFeignClient;
 
 /**

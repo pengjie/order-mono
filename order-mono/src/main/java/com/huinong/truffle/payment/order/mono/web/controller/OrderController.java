@@ -1,11 +1,5 @@
 package com.huinong.truffle.payment.order.mono.web.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiOperation.Status;
-
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -16,14 +10,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.huinong.truffle.component.base.component.version.anno.ApiVersion;
-import com.huinong.truffle.component.base.constants.BaseResult;
-import com.huinong.truffle.component.base.constants.PageValue;
+import com.huinong.framework.autoconfigure.mybatis.MybatisPageValue;
+import com.huinong.framework.autoconfigure.web.BaseResult;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
 import com.huinong.truffle.payment.order.mono.domain.HnpMainOrder;
 import com.huinong.truffle.payment.order.mono.domain.HnpOrder;
 import com.huinong.truffle.payment.order.mono.domain.OrderQuery;
 import com.huinong.truffle.payment.order.mono.service.OrderService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiOperation.Status;
 
 
 /**
@@ -45,7 +44,6 @@ public class OrderController extends BaseController{
 	 * @param request
 	 * @return
 	 */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="创建订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
 	@RequestMapping(value = "/create", method = {RequestMethod.POST})
     public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
@@ -58,7 +56,7 @@ public class OrderController extends BaseController{
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("预支付创建订单异常",e);
-			return BaseResult.fail(OrderResultCode.SYS_0001);
+			return BaseResult.fail(OrderResultCode.SYS_0001.getCode(),OrderResultCode.SYS_0001.getMsg());
 		}
 	}
 	
@@ -67,7 +65,6 @@ public class OrderController extends BaseController{
 	 * @param request
 	 * @return
 	 */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="查询订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="获取订单信息")
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String")
@@ -85,7 +82,6 @@ public class OrderController extends BaseController{
      * @param request
      * @return
      */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="查询订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="获取订单列表信息")
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String")
@@ -103,7 +99,6 @@ public class OrderController extends BaseController{
      * @param request
      * @return
      */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="完结订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "mainOrderNo", value = "主订单号", required = true, paramType="query", dataType = "String"),
@@ -120,7 +115,7 @@ public class OrderController extends BaseController{
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("完结订单异常",e);
-			return BaseResult.fail(OrderResultCode.SYS_0001);
+			return BaseResult.fail(OrderResultCode.SYS_0001.getCode(),OrderResultCode.SYS_0001.getMsg());
 		}
     }
     
@@ -129,7 +124,6 @@ public class OrderController extends BaseController{
      * @param serialNumber
      * @return
      */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="查询订单详情-流水号", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "serialNumber", value = "流水号", required = true, paramType="query", dataType = "String")
@@ -148,7 +142,6 @@ public class OrderController extends BaseController{
      * @param state
      * @return
      */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="平台付款完成-订单详情-更新状态", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回<Void>")
     @ApiImplicitParams({
     	@ApiImplicitParam(name = "serialNumber", value = "流水号", required = true, paramType="query", dataType = "String"),
@@ -168,12 +161,11 @@ public class OrderController extends BaseController{
      * @param orderQuery
      * @return
      */
-    @ApiVersion(1)
     @ApiOperation(author="彭杰",status=Status.UN_COMPLETE,value="分页查询订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单列表")
     @RequestMapping(value = "/queryPageOrderData", method= RequestMethod.POST)
-    public BaseResult<PageValue<HnpOrder>> queryPageOrderData(OrderQuery orderQuery){
+    public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(OrderQuery orderQuery){
     	logger.info("[订单服务][分页查询订单列表]请求参数:"+gson.toJson(orderQuery));
-    	BaseResult<PageValue<HnpOrder>> result = orderService.queryPageOrderData(orderQuery);
+    	BaseResult<MybatisPageValue<HnpOrder>> result = orderService.queryPageOrderData(orderQuery);
     	logger.info("[订单服务][分页查询订单列表]请求返回:"+gson.toJson(result));
     	return result ;
     }

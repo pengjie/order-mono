@@ -1,29 +1,27 @@
-#配置中心的地址一定要放在bootstrap.yml|properties中,指定git读取配置中心文件
 server:
   port: 16112
 spring:
   application:
     name: payment-order-mono
-  cloud:
-    config:
-      name: payment-ordermono #定位Git中的资源
-      profile: ${spring.profiles.active:pro} #默认指定pro结尾的文件如: message-center-pro.yml
-      label: master #对应git分支
-      discovery:
-        enabled: true #开启通过服务来访问Config Server的功能
-        service-id: api-config #指定Config Server注册的服务名
   profiles:
     active: dev
-    
-eureka:
-  instance:
-    prefer-ip-address: true
-    lease-expiration-duration-in-seconds: 30 
-    lease-renewal-interval-in-seconds: 10
-    host1: eureka-server-1
-    host2: eureka-server-2
-  client:
-    # healthcheck:
-    # enabled: true
-    serviceUrl:
-      defaultZone: http://${eureka.instance.host1}:1111/eureka/,http://${eureka.instance.host2}:1111/eureka/
+  aop:
+    auto: true
+    proxy-target-class: false
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false      
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 5000
+
+hnSwagger:
+  basePackage: com.huinong.truffle.payment.order.mono.web.controller
+  enable: true
+  title: 账户系统订单数据服务
+  description: API文档
+      

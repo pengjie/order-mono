@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.huinong.truffle.component.base.constants.BaseResult;
-import com.huinong.truffle.component.base.constants.ResultCode;
+import com.huinong.framework.autoconfigure.web.BaseResult;
+import com.huinong.framework.autoconfigure.web.ResultCode;
 
 
 @Aspect
