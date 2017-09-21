@@ -1,7 +1,7 @@
 /**
  * 生成支付端流水号
  */
-package com.huinong.truffle.payment.order.mono.component.zk;
+package com.huinong.truffle.payment.order.mono.component;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
