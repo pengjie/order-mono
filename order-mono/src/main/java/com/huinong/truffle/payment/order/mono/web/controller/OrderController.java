@@ -167,7 +167,7 @@ public class OrderController{
      */
     @ApiOperation(author="彭杰",status=Status.UN_COMPLETE,value="分页查询订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单列表")
     @RequestMapping(value = "/queryPageOrderData", method= RequestMethod.POST)
-    public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(OrderQuery orderQuery){
+    public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(@RequestBody OrderQuery orderQuery){
     	logger.info("[订单服务][分页查询订单列表]请求参数:"+hnJson.obj2string(orderQuery));
     	BaseResult<MybatisPageValue<HnpOrder>> result = orderService.queryPageOrderData(orderQuery);
     	logger.info("[订单服务][分页查询订单列表]请求返回:"+hnJson.obj2string(result));
