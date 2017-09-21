@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,7 +50,7 @@ public class OrderController{
 	 */
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="创建订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
 	@RequestMapping(value = "/create", method = {RequestMethod.POST})
-    public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
+    public BaseResult<HnpMainOrder> create(@RequestBody HnpMainOrder mainOrder){
 	    logger.info("[订单服务][预支付]请求参数:"+hnJson.obj2string(mainOrder));
 	    BaseResult<HnpMainOrder> result = new BaseResult<HnpMainOrder>();
 	    try {
