@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,11 +38,10 @@ import com.huinong.truffle.payment.order.mono.service.OrderService;
 public class OrderController {
     private static Logger logger = LoggerFactory.getLogger(OrderController.class);
     
-    @Autowired
-    private HnJson hnJson ;
-    
     @Autowired 
     private OrderService orderService ;
+    @Autowired
+    private HnJson hnJson;
     
 	/**
 	 * 预支付(产生支付流水信息) 
@@ -50,7 +50,7 @@ public class OrderController {
 	 */
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="创建订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
 	@RequestMapping(value = "/create", method = {RequestMethod.POST})
-    public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
+    public BaseResult<HnpMainOrder> create(@RequestBody HnpMainOrder mainOrder){
 	    logger.info("[订单服务][预支付]请求参数:"+hnJson.obj2string(mainOrder));
 	    BaseResult<HnpMainOrder> result = new BaseResult<HnpMainOrder>();
 	    try {
@@ -167,12 +167,11 @@ public class OrderController {
      */
     @ApiOperation(author="彭杰",status=Status.UN_COMPLETE,value="分页查询订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单列表")
     @RequestMapping(value = "/queryPageOrderData", method= RequestMethod.POST)
-    public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(OrderQuery orderQuery){
+    public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(@RequestBody OrderQuery orderQuery){
     	logger.info("[订单服务][分页查询订单列表]请求参数:"+hnJson.obj2string(orderQuery));
     	BaseResult<MybatisPageValue<HnpOrder>> result = orderService.queryPageOrderData(orderQuery);
     	logger.info("[订单服务][分页查询订单列表]请求返回:"+hnJson.obj2string(result));
     	return result ;
     }
-    
     
 }

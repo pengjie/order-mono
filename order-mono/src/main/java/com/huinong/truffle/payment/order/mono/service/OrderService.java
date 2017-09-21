@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import redis.clients.jedis.JedisCluster;
+
 import com.github.pagehelper.PageHelper;
+import com.huinong.framework.autoconfigure.jackson.HnJson;
 import com.huinong.framework.autoconfigure.mybatis.MybatisPageValue;
 import com.huinong.framework.autoconfigure.web.BaseResult;
 import com.huinong.framework.autoconfigure.web.ResultCode;
@@ -38,13 +41,12 @@ import com.huinong.truffle.payment.order.mono.domain.OrderQuery;
 import com.huinong.truffle.payment.order.mono.entity.HnpMainOrderEntity;
 import com.huinong.truffle.payment.order.mono.entity.HnpOrderEntity;
 
-import redis.clients.jedis.JedisCluster;
-
 @Service("orderService")
 public class OrderService {
 
 	private static Logger logger = LoggerFactory.getLogger(OrderService.class);
-	
+	@Autowired
+	private HnJson hnJson;
 	@Autowired
 	private MainOrderWriteDAO mainOrderWriteDAO ;
 	@Autowired

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.huinong.framework.autoconfigure.jackson.HnJson;
 
-
 /**
  * 返回结果解析器
  * @author zhou 2016年9月6日
@@ -48,6 +47,15 @@ public class RespResultParser {
         return pageResult ;
     }
     
+    /**
+     * 将结果转换成分页对象
+     * @param result 请求返回结果
+     * @param clazz 数据类
+     * @return
+    @SuppressWarnings("unchecked")
+    public static <T> RespPageResult4List<T> parse2ObjAsPageAsList(String result , Type type){
+        return (RespPageResult4List<T>)gson.fromJson(result, type);
+    }*/
     
     /**
      * 将结果转换成分页对象
@@ -74,5 +82,14 @@ public class RespResultParser {
         
     }
     
+    /**
+     * 将结果转换成分页对象
+     * @param result 请求返回结果
+     * @param clazz 数据类
+     * @return
+     */
+    /*public static <T> T parse2ObjAsPage(String result ,TypeToken<T> typeToken){
+        return   gson.fromJson(result, typeToken.getType());
+    }*/
      
 }

@@ -21,7 +21,6 @@ public class LoggerAspect {
   
     @Autowired
     private HnJson hnJson ; 
-    
 	ThreadLocal<Long> startTime = new ThreadLocal<Long>(); // 定义属性,解决同步问题
 	static Hashtable<String,Logger> loggers = new Hashtable<String,Logger>();
 	
