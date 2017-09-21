@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.PageHelper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.huinong.framework.autoconfigure.mybatis.MybatisPageValue;
 import com.huinong.framework.autoconfigure.web.BaseResult;
 import com.huinong.framework.autoconfigure.web.ResultCode;
@@ -47,8 +45,6 @@ public class OrderService {
 
 	private static Logger logger = LoggerFactory.getLogger(OrderService.class);
 	
-	public Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-
 	@Autowired
 	private MainOrderWriteDAO mainOrderWriteDAO ;
 	@Autowired

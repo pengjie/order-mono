@@ -7,9 +7,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
+import com.huinong.framework.autoconfigure.jackson.HnJson;
 import com.huinong.framework.autoconfigure.web.BaseResult;
 import com.huinong.framework.autoconfigure.web.ResultCode;
 
@@ -17,9 +18,11 @@ import com.huinong.framework.autoconfigure.web.ResultCode;
 @Aspect
 @Component
 public class LoggerAspect {
-	
+  
+    @Autowired
+    private HnJson hnJson ; 
+    
 	ThreadLocal<Long> startTime = new ThreadLocal<Long>(); // 定义属性,解决同步问题
-	static Gson gson = new Gson();
 	static Hashtable<String,Logger> loggers = new Hashtable<String,Logger>();
 	
 	@Pointcut("execution(public * com.huinong.truffle.payment.order.mono.service.*.*(..))")
@@ -48,7 +51,7 @@ public class LoggerAspect {
 		Class<?> clazz = pjp.getTarget().getClass();
 		Logger logger = getLogger(clazz);
 		Object [] parameters = pjp.getArgs() == null ? new Object[]{}: pjp.getArgs();
-		logger.info(clazz.getName()  +"."+method +" start invoke. parameters :" + gson.toJson(parameters));
+		logger.info(clazz.getName()  +"."+method +" start invoke. parameters :" + hnJson.obj2string(parameters));
 		Object result = null;
 		try {
 			result = pjp.proceed();
@@ -61,12 +64,12 @@ public class LoggerAspect {
 				if(result instanceof BaseResult){
 					BaseResult<?> baseResult = (BaseResult<?>)result;				
 					if(ResultCode.SUCCESS.getCode() !=  baseResult.getCode()){
-						logger.error(clazz.getName()  +"."+method +"("+gson.toJson(parameters)+") invoke failure. result :" + gson.toJson(result));
+						logger.error(clazz.getName()  +"."+method +"("+hnJson.obj2string(parameters)+") invoke failure. result :" + hnJson.obj2string(result));
 					}else{
-						logger.info(clazz.getName() +"."+method +"("+gson.toJson(parameters)+") invoke finish. result :" +  gson.toJson(result) );
+						logger.info(clazz.getName() +"."+method +"("+hnJson.obj2string(parameters)+") invoke finish. result :" +  hnJson.obj2string(result) );
 					}
 				}else{
-					logger.info(clazz.getName() +"."+method +"("+gson.toJson(parameters)+")  invoke finish. result :" + gson.toJson(result == null ? "null": result));
+					logger.info(clazz.getName() +"."+method +"("+hnJson.obj2string(parameters)+")  invoke finish. result :" + hnJson.obj2string(result == null ? "null": result));
 				}
 			}
 		}
