@@ -8,8 +8,9 @@ import java.util.Map;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.huinong.framework.autoconfigure.jackson.HnJson;
 
 /**
  * 简化取参数的过程
@@ -18,7 +19,8 @@ import com.google.gson.GsonBuilder;
  */
 public class ParamHandler {
 
-	public Gson gson = new GsonBuilder().serializeNulls().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+	@Autowired
+	public HnJson hnJson;
 	private Map<String, Object> map;
 	
 	/**
@@ -35,7 +37,7 @@ public class ParamHandler {
 	 */
 	@SuppressWarnings("unchecked")
 	public ParamHandler(Object object){
-		this.map = gson.fromJson(gson.toJson(object), Map.class);
+		this.map = hnJson.str2obj(hnJson.obj2string(object), Map.class);
 	}
 	
 	/**
@@ -64,7 +66,7 @@ public class ParamHandler {
 					temp.append(new String(b, 0, len));
 				}
 				if (temp.length() > 0) {
-					map = gson.fromJson(temp.toString(), Map.class);
+					map = hnJson.str2obj(temp.toString(), Map.class);
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -141,7 +143,7 @@ public class ParamHandler {
 	 * @return
 	 */
 	public <T> T getBean(Class<T> classOfT) {
-		return gson.fromJson(gson.toJson(map), classOfT);
+		return hnJson.str2obj(hnJson.obj2string(map), classOfT);
 	}
 	
 	public Map<String, Object> getMap() {

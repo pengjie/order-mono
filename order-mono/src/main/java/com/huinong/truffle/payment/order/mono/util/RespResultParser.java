@@ -1,14 +1,11 @@
 package com.huinong.truffle.payment.order.mono.util;
 
 import java.lang.reflect.Type;
-import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -26,7 +23,7 @@ public class RespResultParser {
 	
 	private static Gson gson = builder.serializeNulls().create();*/
 
-	
+	@Autowired
 	private static Gson gson = new GsonBuilder().serializeNulls()
 			.setDateFormat("yyyy-MM-dd HH:mm:ss").create();  
 	

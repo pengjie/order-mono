@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.huinong.framework.autoconfigure.jackson.HnJson;
 import com.huinong.framework.autoconfigure.mybatis.MybatisPageValue;
 import com.huinong.framework.autoconfigure.web.BaseResult;
 import com.huinong.truffle.payment.order.mono.constant.OrderResultCode;
@@ -33,11 +34,13 @@ import io.swagger.annotations.ApiOperation.Status;
 @RestController
 @Api(description="支付订单服务")
 @RequestMapping("/order/v1")
-public class OrderController extends BaseController{
+public class OrderController{
     private static Logger logger = LoggerFactory.getLogger(OrderController.class);
     
     @Autowired 
     private OrderService orderService ;
+    @Autowired
+    private HnJson hnJson;
     
 	/**
 	 * 预支付(产生支付流水信息) 
@@ -47,11 +50,11 @@ public class OrderController extends BaseController{
     @ApiOperation(author="彭杰",status=Status.COMPLETE,value="创建订单", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单信息")
 	@RequestMapping(value = "/create", method = {RequestMethod.POST})
     public BaseResult<HnpMainOrder> create(HnpMainOrder mainOrder){
-	    logger.info("[订单服务][预支付]请求参数:"+gson.toJson(mainOrder));
+	    logger.info("[订单服务][预支付]请求参数:"+hnJson.obj2string(mainOrder));
 	    BaseResult<HnpMainOrder> result = new BaseResult<HnpMainOrder>();
 	    try {
 	    	result = orderService.createOrder(mainOrder);
-	    	logger.info("[订单服务][预支付]返回参数:"+gson.toJson(result));
+	    	logger.info("[订单服务][预支付]返回参数:"+hnJson.obj2string(result));
 	    	return result;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -73,7 +76,7 @@ public class OrderController extends BaseController{
 	public BaseResult<HnpMainOrder> query(String mainOrderNo){
 	    logger.info("[订单服务][查询]请求参数:mainOrderNo="+mainOrderNo);
 	    BaseResult<HnpMainOrder> result  = orderService.queryMainOrder(mainOrderNo);
-	    logger.info("[订单服务][查询]返回参数:"+gson.toJson(result));
+	    logger.info("[订单服务][查询]返回参数:"+hnJson.obj2string(result));
     	return result ;
 	}
 	
@@ -90,7 +93,7 @@ public class OrderController extends BaseController{
     public BaseResult<List<HnpOrder>> querylist(String mainOrderNo){
         logger.info("[订单服务][查询]请求参数:mainOrderNo="+mainOrderNo);
         BaseResult<List<HnpOrder>> result = orderService.queryDetail(mainOrderNo);
-        logger.info("[订单服务][查询]返回参数:"+gson.toJson(result));
+        logger.info("[订单服务][查询]返回参数:"+hnJson.obj2string(result));
     	return result ;
     }
     
@@ -110,7 +113,7 @@ public class OrderController extends BaseController{
         BaseResult<HnpMainOrder> result = new BaseResult<HnpMainOrder>();
 		try {
 			result = orderService.finishOrder(mainOrderNo,payStatus);
-			logger.info("[订单服务][完结订单]返回参数:"+gson.toJson(result));
+			logger.info("[订单服务][完结订单]返回参数:"+hnJson.obj2string(result));
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -132,7 +135,7 @@ public class OrderController extends BaseController{
     public BaseResult<HnpOrder> getHnpDetailBySerialNumber(String serialNumber){
     	logger.info("[订单服务][根据流水号查询子订单信息]请求参数:serialNumber="+serialNumber);
     	BaseResult<HnpOrder> result = orderService.queryBySerialNumber(serialNumber);
-    	logger.info("[订单服务][根据流水号查询子订单信息]返回参数:"+gson.toJson(result));
+    	logger.info("[订单服务][根据流水号查询子订单信息]返回参数:"+hnJson.obj2string(result));
     	return result;
     }
     
@@ -151,7 +154,7 @@ public class OrderController extends BaseController{
     public BaseResult<Void> updateHnpDetailBySerialNumber(String serialNumber,Integer state){
     	logger.info("[订单服务][根据流水号更新子订单状态]请求参数:serialNumber="+serialNumber+",state="+state);
     	BaseResult<Void> result = orderService.updateHnpDetailBySerialNumber(serialNumber,state);
-    	logger.info("[订单服务][根据流水号更新子订单状态]返回参数:"+gson.toJson(result));
+    	logger.info("[订单服务][根据流水号更新子订单状态]返回参数:"+hnJson.obj2string(result));
     	return result;
     }
     
@@ -164,9 +167,9 @@ public class OrderController extends BaseController{
     @ApiOperation(author="彭杰",status=Status.UN_COMPLETE,value="分页查询订单列表", produces = MediaType.APPLICATION_JSON_VALUE,notes="返回订单列表")
     @RequestMapping(value = "/queryPageOrderData", method= RequestMethod.POST)
     public BaseResult<MybatisPageValue<HnpOrder>> queryPageOrderData(OrderQuery orderQuery){
-    	logger.info("[订单服务][分页查询订单列表]请求参数:"+gson.toJson(orderQuery));
+    	logger.info("[订单服务][分页查询订单列表]请求参数:"+hnJson.obj2string(orderQuery));
     	BaseResult<MybatisPageValue<HnpOrder>> result = orderService.queryPageOrderData(orderQuery);
-    	logger.info("[订单服务][分页查询订单列表]请求返回:"+gson.toJson(result));
+    	logger.info("[订单服务][分页查询订单列表]请求返回:"+hnJson.obj2string(result));
     	return result ;
     }
     
